@@ -36,6 +36,7 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+html { overflow-x: hidden; }
 body {
   margin: 0;
   font-family: var(--font);
@@ -45,7 +46,10 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
+/* Sheet açıkken arka plan kilitli */
+body.scroll-locked { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 a { color: var(--accent-text); text-decoration: none; }
@@ -271,7 +275,7 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; line-height
 .sheet-grip { position: absolute; top: 7px; left: 50%; width: 36px; height: 4px; border-radius: 4px; background: var(--border-strong); transform: translateX(-50%); }
 .sheet-title { flex: 1; font-size: 17px; font-weight: 700; letter-spacing: -.01em; padding-top: 8px; }
 .sheet-close { margin-top: 6px; }
-.sheet-body { padding: 6px 20px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.sheet-body { padding: 6px 20px 20px; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
 .sheet-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 16px; border-top: 1px solid var(--border); }
 .sheet-foot .btn { min-width: 110px; }
 @media (min-width: 640px) {

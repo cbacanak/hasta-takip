@@ -161,6 +161,23 @@ export function phoneHref(phone) {
 /* ---------------- Katman: sheet / confirm / toast ---------------- */
 const layer = () => document.getElementById('layer');
 
+/* Sheet açıkken arka plandaki sayfanın kaymasını engeller (iOS dahil) */
+let openSheets = 0;
+let savedScrollY = 0;
+function lockScroll() {
+  if (openSheets++ > 0) return;
+  savedScrollY = window.scrollY;
+  document.body.style.top = `-${savedScrollY}px`;
+  document.body.classList.add('scroll-locked');
+}
+function unlockScroll() {
+  if (--openSheets > 0) return;
+  openSheets = 0;
+  document.body.classList.remove('scroll-locked');
+  document.body.style.top = '';
+  window.scrollTo(0, savedScrollY);
+}
+
 /**
  * Alt sayfa (mobil) / diyalog (masaüstü). content: HTML string veya element.
  * Döner: { el, body, close(result) , result: Promise }
@@ -183,16 +200,20 @@ export function sheet({ title, content, footer = '', size = 'md', onClose } = {}
 
   let resolve;
   const result = new Promise((r) => { resolve = r; });
+  let closed = false;
   const close = (val = null) => {
-    if (!root.isConnected) return;
+    if (closed || !root.isConnected) return;
+    closed = true;
     root.classList.add('closing');
     document.removeEventListener('keydown', onKey);
+    unlockScroll();
     setTimeout(() => { root.remove(); onClose?.(val); resolve(val); }, 180);
   };
   const onKey = (e) => { if (e.key === 'Escape') close(null); };
   root.addEventListener('click', (e) => { if (e.target === root) close(null); });
   root.querySelector('.sheet-close').addEventListener('click', () => close(null));
   document.addEventListener('keydown', onKey);
+  lockScroll();
   layer().appendChild(root);
   setTimeout(() => root.classList.add('open'), 10);
   const first = body.querySelector('input:not([type=hidden]),select,textarea,button');

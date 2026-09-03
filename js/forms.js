@@ -5,10 +5,13 @@ import { processImage, parseTags } from './photos.js';
 import { sheet, field, selectField, textareaField, segmented, bindSegmented, formData, esc, icon, toast, fmtDate } from './ui.js';
 
 export const PROCEDURE_TYPES = [
-  'Rinoplasti', 'Revizyon Rinoplasti', 'Septorinoplasti', 'Blefaroplasti', 'Yüz Germe', 'Boyun Germe',
-  'Kaş Kaldırma', 'Otoplasti', 'Meme Büyütme', 'Meme Küçültme', 'Meme Dikleştirme', 'Jinekomasti',
-  'Liposuction', 'Abdominoplasti', 'Brazilian Butt Lift', 'Kol Germe', 'Uyluk Germe', 'Yağ Enjeksiyonu',
-  'Dolgu', 'Botoks', 'Saç Ekimi', 'Skar Revizyonu', 'Diğer',
+  ...[
+    'Rinoplasti', 'Revizyon Rinoplasti', 'Septorinoplasti', 'Blefaroplasti', 'Yüz Germe', 'Boyun Germe',
+    'Kaş Kaldırma', 'Otoplasti', 'Meme Büyütme', 'Meme Küçültme', 'Meme Dikleştirme', 'Jinekomasti',
+    'Liposuction', 'Abdominoplasti', 'Brazilian Butt Lift', 'Kol Germe', 'Uyluk Germe', 'Yağ Enjeksiyonu',
+    'Dolgu', 'Botoks', 'Saç Ekimi', 'Skar Revizyonu',
+  ].sort((a, b) => a.localeCompare(b, 'tr')),
+  'Diğer',
 ];
 
 export const ANESTHESIA = ['Genel', 'Lokal', 'Sedasyon', 'Lokal + Sedasyon'];
