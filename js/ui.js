@@ -272,10 +272,13 @@ export function formData(form) {
 }
 
 export function field({ label, name, type = 'text', value = '', placeholder = '', required = false, hint = '', attrs = '' }) {
+  const input = `<input class="input" type="${type}" name="${name}" value="${esc(value)}" placeholder="${esc(placeholder)}" ${required ? 'required' : ''} ${attrs}>`;
+  // iOS Safari tarih/saat kutularına içsel genişlik dayatır; sabit boyutlu sarmalayıcı bunu geçersiz kılar
+  const isDate = type === 'date' || type === 'time' || type === 'datetime-local';
   return `
     <label class="field">
       <span class="field-label">${esc(label)}${required ? ' <b class="req">*</b>' : ''}</span>
-      <input class="input" type="${type}" name="${name}" value="${esc(value)}" placeholder="${esc(placeholder)}" ${required ? 'required' : ''} ${attrs}>
+      ${isDate ? `<span class="date-wrap">${input}</span>` : input}
       ${hint ? `<span class="field-hint">${esc(hint)}</span>` : ''}
     </label>`;
 }

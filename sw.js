@@ -1,5 +1,5 @@
 /* Service worker — uygulama kabuğunu çevrimdışı kullanım için önbelleğe alır */
-const VERSION = 'v0.1.1';
+const VERSION = 'v0.1.2';
 const CACHE = `hasta-takip-${VERSION}`;
 const SHELL = [
   './',
@@ -36,10 +36,12 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || !req.url.startsWith(self.location.origin)) return;
+  // HTTP önbelleğini atlayıp sunucuyla doğrula (GitHub Pages 10 dk max-age gönderir)
+  const fresh = new Request(req, { cache: 'no-cache' });
   // Gezinme: ağ öncelikli, çevrimdışıysa kabuk
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then((res) => {
+      fetch(fresh).then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put('./index.html', copy));
         return res;
@@ -49,10 +51,10 @@ self.addEventListener('fetch', (e) => {
   }
   // Diğer varlıklar: ağ öncelikli (her zaman güncel), çevrimdışıysa önbellek
   e.respondWith(
-    fetch(req).then((res) => {
+    fetch(fresh).then((res) => {
       if (res && res.ok) caches.open(CACHE).then((c) => c.put(req, res.clone()));
       return res;
-    }).catch(() => caches.match(req))
+    }).catch(() => caches.match(req, { ignoreSearch: true }))
   );
 });
 
