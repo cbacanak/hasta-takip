@@ -2,7 +2,6 @@
 import { Patients, Procedures, Appointments, fullName, counts } from '../db.js';
 import { esc, icon, initials, fmtDate, fmtDayMonth, relDay, parseDate, emptyState, toast, age } from '../ui.js';
 import { patientForm } from '../forms.js';
-import { loadSampleData } from '../seed.js';
 import { setTopbar, go } from '../nav.js';
 
 let lastQuery = '';
@@ -41,16 +40,10 @@ export async function render(root) {
     const rows = q ? patients.filter((p) => `${fullName(p)} ${p.phone || ''}`.toLocaleLowerCase('tr').includes(q)) : patients;
     if (!patients.length) {
       list.innerHTML = emptyState({
-        icon: 'users', title: 'Henüz hasta kaydı yok', text: 'İlk hastayı ekleyin ya da uygulamayı tanımak için örnek veriyi yükleyin.',
-        action: `<div class="empty-actions"><button class="btn btn-primary" data-act="add">${icon('plus')}Yeni hasta</button><button class="btn btn-outline" data-act="seed">${icon('sparkle')}Örnek veri yükle</button></div>`,
+        icon: 'users', title: 'Henüz hasta kaydı yok', text: 'İlk hasta kartını oluşturarak başlayın.',
+        action: `<button class="btn btn-primary" data-act="add">${icon('plus')}Yeni hasta</button>`,
       });
       list.querySelector('[data-act=add]').onclick = addPatient;
-      list.querySelector('[data-act=seed]').onclick = async (e) => {
-        e.target.disabled = true; e.target.textContent = 'Yükleniyor…';
-        await loadSampleData();
-        toast('Örnek veri yüklendi', { kind: 'ok' });
-        render(root);
-      };
       return;
     }
     if (!rows.length) { list.innerHTML = emptyState({ icon: 'search', title: 'Sonuç yok', text: `"${lastQuery}" ile eşleşen hasta bulunamadı.` }); return; }

@@ -1,5 +1,5 @@
 /* Service worker — uygulama kabuğunu çevrimdışı kullanım için önbelleğe alır */
-const VERSION = 'v0.1.0';
+const VERSION = 'v0.1.1';
 const CACHE = `hasta-takip-${VERSION}`;
 const SHELL = [
   './',
@@ -13,7 +13,6 @@ const SHELL = [
   './js/photos.js',
   './js/schedule.js',
   './js/forms.js',
-  './js/seed.js',
   './js/views/patients.js',
   './js/views/patient.js',
   './js/views/calendar.js',
