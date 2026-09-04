@@ -1,7 +1,7 @@
 /* Formlar: hasta, işlem, randevu, fotoğraf */
 import { Patients, Procedures, Appointments, Photos } from './db.js';
 import { buildControls, todayISO, toLocalISO } from './schedule.js';
-import { processImage, parseTags } from './photos.js';
+import { processImage, parseTags, readExifDate } from './photos.js';
 import { sheet, field, selectField, textareaField, segmented, bindSegmented, formData, esc, icon, toast, fmtDate } from './ui.js';
 
 export const PROCEDURE_TYPES = [
@@ -211,6 +211,13 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
   const zone = form.querySelector('#zone');
   const previews = form.querySelector('#previews');
   const tagsInput = form.querySelector('[name=tags]');
+  const dateInput = form.querySelector('[name=date]');
+  const dateHint = document.createElement('span');
+  dateHint.className = 'field-hint';
+  dateHint.hidden = true;
+  dateInput.closest('.field').appendChild(dateHint);
+  let dateTouched = false; // kullanıcı tarihi elle değiştirdiyse EXIF ile üzerine yazma
+  dateInput.addEventListener('input', () => { dateTouched = true; syncDate(); });
   bindSegmented(form.querySelector('.seg'), (v) => { phase = v; });
   zone.onclick = () => input.click();
   zone.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } };
@@ -229,14 +236,34 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
     previews.innerHTML = files.map((f, i) => `
       <div class="preview"><img src="${f.url}" alt=""><button type="button" class="rm" data-i="${i}" aria-label="Kaldır">${icon('x')}</button></div>`).join('');
     previews.querySelectorAll('.rm').forEach((b) => {
-      b.onclick = () => { URL.revokeObjectURL(files[+b.dataset.i].url); files.splice(+b.dataset.i, 1); renderPreviews(); };
+      b.onclick = () => { URL.revokeObjectURL(files[+b.dataset.i].url); files.splice(+b.dataset.i, 1); renderPreviews(); syncDate(); };
     });
     zone.querySelector('b').textContent = files.length ? `${files.length} fotoğraf seçildi · daha ekle` : 'Galeriden seç';
   }
-  input.onchange = () => {
-    [...input.files].forEach((f) => files.push({ file: f, url: URL.createObjectURL(f) }));
+  /* EXIF çekim tarihini forma yansıtır */
+  function syncDate() {
+    const dates = files.map((f) => f.exifDate).filter(Boolean);
+    const distinct = [...new Set(dates)];
+    if (!dateTouched && distinct.length) dateInput.value = distinct[0];
+    let msg = '';
+    if (dates.length && !dateTouched) {
+      msg = distinct.length > 1
+        ? 'Fotoğrafların çekim tarihleri farklı; her biri kendi tarihiyle kaydedilir.'
+        : dates.length === files.length ? 'Çekim tarihi fotoğraftan alındı.' : 'Çekim tarihi fotoğraftan alındı; tarih bilgisi olmayanlar bu tarihle kaydedilir.';
+    } else if (dates.length && dateTouched && distinct.length > 1) {
+      msg = 'Tüm fotoğraflar seçtiğiniz tarihle kaydedilir.';
+    }
+    dateHint.textContent = msg;
+    dateHint.hidden = !msg;
+  }
+
+  input.onchange = async () => {
+    const added = [...input.files].map((f) => ({ file: f, url: URL.createObjectURL(f), exifDate: null }));
+    files.push(...added);
     input.value = '';
     renderPreviews();
+    await Promise.all(added.map(async (f) => { f.exifDate = await readExifDate(f.file); }));
+    syncDate();
   };
 
   wireForm(s, async (d) => {
@@ -247,8 +274,10 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
     for (let i = 0; i < files.length; i++) {
       submit.textContent = `İşleniyor ${i + 1}/${files.length}`;
       const img = await processImage(files[i].file);
+      // Kullanıcı tarihi elle seçmediyse her fotoğraf kendi EXIF tarihiyle kaydedilir
+      const date = (!dateTouched && files[i].exifDate) || d.date;
       saved.push(await Photos.save({
-        patientId, procedureId: d.procedureId || null, phase, date: d.date, tags,
+        patientId, procedureId: d.procedureId || null, phase, date, tags,
         blob: img.blob, thumb: img.thumb, width: img.width, height: img.height,
         originalName: files[i].file.name, size: img.blob.size,
       }));
