@@ -165,12 +165,34 @@ export const Procedures = {
 };
 
 /* ---------------- Fotoğraflar ---------------- */
+/*
+ * Görsel verisi IndexedDB'ye Blob değil ArrayBuffer olarak yazılır. Bazı Chromium
+ * sürümleri (özellikle Android) Blob yazarken "Error preparing Blob/File data to be
+ * stored in object store" hatası verir; ArrayBuffer bu yoldan geçmez. Okurken
+ * görünümler için Blob'a çevrilir; eski kayıtlardaki Blob'lar da olduğu gibi çalışır.
+ */
+const PHOTO_MIME = 'image/jpeg';
+async function dehydrate(v) { return v instanceof Blob ? await v.arrayBuffer() : v; }
+function hydrate(v, mime) { return v instanceof ArrayBuffer ? new Blob([v], { type: mime || PHOTO_MIME }) : v; }
+function hydratePhoto(p) { return p ? { ...p, blob: hydrate(p.blob, p.mime), thumb: hydrate(p.thumb, p.mime) } : p; }
+async function dehydratePhoto(p) {
+  const mime = p.mime || (p.blob instanceof Blob && p.blob.type) || PHOTO_MIME;
+  return { ...p, mime, blob: await dehydrate(p.blob), thumb: await dehydrate(p.thumb) };
+}
+
 const _photos = baseStore('photos');
 export const Photos = {
   ..._photos,
-  save: (p) => _photos.put(stamp(p)),
+  all: async () => (await _photos.all()).map(hydratePhoto),
+  get: async (id) => hydratePhoto(await _photos.get(id)),
+  byIndex: async (idx, val) => (await _photos.byIndex(idx, val)).map(hydratePhoto),
+  async save(p) {
+    const obj = await dehydratePhoto(stamp(p));
+    await _photos.put(obj);
+    return hydratePhoto(obj);
+  },
   async byPatient(patientId) {
-    const list = await _photos.byIndex('patientId', patientId);
+    const list = await Photos.byIndex('patientId', patientId);
     return list.sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.createdAt.localeCompare(a.createdAt));
   },
   async countByPatient(patientId) {
@@ -241,9 +263,17 @@ function blobToDataURL(blob) {
   });
 }
 
-async function dataURLToBlob(url) {
+async function dataURLToBuffer(url) {
   const r = await fetch(url);
-  return r.blob();
+  return r.arrayBuffer();
+}
+
+/** Eski kayıtlardaki Blob'ları ArrayBuffer'a çevirir (bir kez, arka planda). */
+export async function migratePhotoBlobs() {
+  const all = await _photos.all();
+  for (const p of all) {
+    if (p.blob instanceof Blob || p.thumb instanceof Blob) await _photos.put(await dehydratePhoto(p));
+  }
 }
 
 /** Tüm veriyi JSON'a dönüştürülebilir düz nesne olarak verir (fotoğraflar base64). */
@@ -255,8 +285,8 @@ export async function exportAll() {
   for (const p of photos) {
     photosOut.push({
       ...p,
-      blob: p.blob ? await blobToDataURL(p.blob) : null,
-      thumb: p.thumb ? await blobToDataURL(p.thumb) : null,
+      blob: p.blob ? await blobToDataURL(hydrate(p.blob, p.mime)) : null,
+      thumb: p.thumb ? await blobToDataURL(hydrate(p.thumb, p.mime)) : null,
     });
   }
   return {
@@ -276,8 +306,9 @@ export async function importAll(data, { replace = true } = {}) {
   for (const p of data.photos || []) {
     photos.push({
       ...p,
-      blob: p.blob ? await dataURLToBlob(p.blob) : null,
-      thumb: p.thumb ? await dataURLToBlob(p.thumb) : null,
+      mime: p.mime || PHOTO_MIME,
+      blob: p.blob ? await dataURLToBuffer(p.blob) : null,
+      thumb: p.thumb ? await dataURLToBuffer(p.thumb) : null,
     });
   }
   const names = ['patients', 'procedures', 'photos', 'appointments', 'settings'];

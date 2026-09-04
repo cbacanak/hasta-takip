@@ -276,11 +276,16 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
       const img = await processImage(files[i].file);
       // Kullanıcı tarihi elle seçmediyse her fotoğraf kendi EXIF tarihiyle kaydedilir
       const date = (!dateTouched && files[i].exifDate) || d.date;
-      saved.push(await Photos.save({
-        patientId, procedureId: d.procedureId || null, phase, date, tags,
-        blob: img.blob, thumb: img.thumb, width: img.width, height: img.height,
-        originalName: files[i].file.name, size: img.blob.size,
-      }));
+      try {
+        saved.push(await Photos.save({
+          patientId, procedureId: d.procedureId || null, phase, date, tags,
+          blob: img.blob, thumb: img.thumb, width: img.width, height: img.height,
+          originalName: files[i].file.name, size: img.blob.size,
+        }));
+      } catch (ex) {
+        const done = saved.length ? ` ${saved.length} fotoğraf kaydedildi.` : '';
+        throw new Error(`"${files[i].file.name}" kaydedilemedi: ${ex?.message || ex}.${done}`);
+      }
       URL.revokeObjectURL(files[i].url);
     }
     toast(`${saved.length} fotoğraf eklendi`, { kind: 'ok' });
