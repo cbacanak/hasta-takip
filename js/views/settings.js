@@ -4,7 +4,7 @@ import { esc, icon, toast, confirmDialog } from '../ui.js';
 import { setTopbar } from '../nav.js';
 import { storageInfo, requestPersist, fmtBytes, downloadBackup, pickBackupFile, restoreBackup } from '../storage.js';
 
-export const APP_VERSION = '0.1.6';
+export const APP_VERSION = '0.1.7';
 
 export async function render(root) {
   setTopbar({ title: 'Ayarlar' });
