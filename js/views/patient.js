@@ -39,7 +39,7 @@ export async function render(root, { id, tab = 'genel' }) {
   /* ---------- Üst çubuk ---------- */
   function topbar() {
     setTopbar({
-      title: fullName(data.patient), back: '/', center: true,
+      title: fullName(data.patient), back: '/', center: true, anchor: '.profile-name',
       actions: [
         { icon: 'edit', label: 'Düzenle', onClick: editPatient },
         { icon: 'more', label: 'Diğer', onClick: patientMenu },

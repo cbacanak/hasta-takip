@@ -46,7 +46,8 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
-  overflow-x: hidden;
+  /* hidden yerine clip: yatay taşmayı keser ama body'yi kaydırma kabı yapmaz, üst çubuk yapışkan kalır */
+  overflow-x: clip;
 }
 /* Sheet açıkken arka plan kilitli */
 body.scroll-locked { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
@@ -80,6 +81,10 @@ h1, h2, h3, h4, p { margin: 0; }
 .topbar-inner { max-width: var(--content-w); margin: 0 auto; height: 100%; display: flex; align-items: center; gap: 6px; padding: 0 10px; }
 .topbar-title { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
 .topbar-title.center { text-align: center; }
+/* Sayfa içindeki büyük başlık görünürken çubuktaki kopyası gizli (bkz. nav.js watchLargeTitle) */
+.topbar-title { transition: opacity .18s ease, transform .18s ease; }
+.topbar.large-title .topbar-title { opacity: 0; transform: translateY(6px); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .topbar-title { transition: none; } }
 .topbar-actions { display: flex; gap: 2px; }
 
 .tabbar {
