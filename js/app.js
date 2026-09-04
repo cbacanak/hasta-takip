@@ -1,6 +1,7 @@
 /* Uygulama girişi: yönlendirici, servis çalışanı */
 import { openDB, migratePhotoBlobs } from './db.js';
 import { currentPath, setActiveNav } from './nav.js';
+import { requestPersist, renderNotice } from './storage.js';
 import { toast, emptyState } from './ui.js';
 
 const routes = [
@@ -50,6 +51,9 @@ async function start() {
   window.addEventListener('hashchange', route);
   route();
   migratePhotoBlobs().catch(() => { /* en iyi çaba; bir sonraki açılışta yeniden denenir */ });
+  // Verilerin tarayıcı tarafından yer açmak için silinmemesini iste; riskli ortamda uyar
+  requestPersist();
+  renderNotice(document.getElementById('notice'));
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then((reg) => {

@@ -51,11 +51,14 @@ function watchLargeTitle(anchor) {
   if (mo) { mo.disconnect(); mo = null; }
   bar.classList.remove('large-title');
   if (!anchor || !('IntersectionObserver' in window)) return;
+  // Görünüm çizilene dek başlık gizli başlar; böylece ilk karede kısa bir parlama olmaz
+  bar.classList.add('large-title');
 
   const attach = () => {
     const el = view.querySelector(anchor);
     if (io) { io.disconnect(); io = null; }
-    if (!el) { bar.classList.remove('large-title'); return; }
+    // Görünüm henüz boşsa karar verme (gizli kal); çizilmiş ama başlık yoksa çubuk başlığını göster
+    if (!el) { if (view.childElementCount) bar.classList.remove('large-title'); return; }
     io = new IntersectionObserver(([e]) => {
       // Başlık çubuğun altındaysa (henüz kaydırılmadı) büyük başlık modundayız
       const below = e.boundingClientRect.top >= bar.getBoundingClientRect().bottom - 1;

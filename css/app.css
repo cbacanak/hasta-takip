@@ -462,6 +462,19 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; line-height
 
 /* Notlar */
 .note-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; white-space: pre-wrap; line-height: 1.5; }
+/* Depolama uyarı bandı (üst çubuğun altında) */
+.notice-host { max-width: var(--content-w); width: 100%; margin: 0 auto; padding: 0 16px; }
+.notice-host:empty { display: none; }
+.notice { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding: 12px 12px 12px 14px; border-radius: var(--radius-sm); font-size: 13.5px; line-height: 1.4; }
+.notice .ic { flex: 0 0 auto; margin-top: 1px; }
+.notice-main { flex: 1; min-width: 0; }
+.notice-main b { display: block; margin-bottom: 2px; }
+.notice .btn-icon { margin: -6px -6px -6px 0; color: inherit; opacity: .7; }
+.notice-info { background: var(--accent-soft); color: var(--accent-text); }
+.notice-warn { background: var(--warn-soft); color: var(--warn); }
+.notice-danger { background: var(--danger-soft); color: var(--danger); }
+@media (min-width: 880px) { .notice-host { padding: 0 32px; } }
+
 .alert-box { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--warn-soft); color: var(--warn); font-size: 14px; }
 .alert-box .ic { flex: 0 0 auto; margin-top: 1px; }
 .alert-box b { font-weight: 700; }
