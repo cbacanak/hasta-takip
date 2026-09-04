@@ -3,7 +3,7 @@ import { counts, clearAllData } from '../db.js';
 import { icon, toast, confirmDialog } from '../ui.js';
 import { setTopbar } from '../nav.js';
 
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.1.4';
 
 export async function render(root) {
   setTopbar({ title: 'Ayarlar' });
