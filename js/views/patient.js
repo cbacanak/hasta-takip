@@ -140,9 +140,9 @@ export async function render(root, { id, tab = 'genel' }) {
         </div>
         <div class="profile-actions">
           ${p.phone ? `<a class="btn btn-outline btn-sm" href="${phoneHref(p.phone)}">${icon('phone')}Ara</a>` : ''}
-          <button class="btn btn-outline btn-sm" data-act="add-photo">${icon('image')}Fotoğraf</button>
-          <button class="btn btn-outline btn-sm" data-act="add-appt">${icon('calendar')}Randevu</button>
-          <button class="btn btn-primary btn-sm" data-act="add-proc">${icon('plus')}İşlem</button>
+          <button class="btn btn-outline btn-sm" data-act="add-photo">${icon('image')}Fotoğraf ekle</button>
+          <button class="btn btn-outline btn-sm" data-act="add-appt">${icon('calendar')}Randevu ekle</button>
+          <button class="btn btn-primary btn-sm" data-act="add-proc">${icon('plus')}İşlem ekle</button>
         </div>
       </section>
 
@@ -316,7 +316,7 @@ export async function render(root, { id, tab = 'genel' }) {
       size: 'md',
       footer: `<button class="btn btn-ghost" data-act="more">${icon('more')}Diğer</button><span class="spacer"></span>
                <button class="btn btn-outline" data-act="edit">${icon('edit')}Düzenle</button>
-               <button class="btn btn-primary" data-act="photo">${icon('image')}Fotoğraf</button>`,
+               <button class="btn btn-primary" data-act="photo">${icon('image')}Fotoğraf ekle</button>`,
       content: `
         <div class="stack">
           <div class="kv">
