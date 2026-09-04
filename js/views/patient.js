@@ -615,7 +615,8 @@ export async function render(root, { id, tab = 'genel' }) {
     v.querySelector('[data-act=edit]').onclick = async () => {
       const ph = list[idx];
       const r = await photoEditForm(ph, data.procedures);
-      if (r) { list[idx] = r; await load(); show(); toast('Fotoğraf güncellendi', { kind: 'ok' }); }
+      // Arkadaki sayfa (galeri, sayaçlar) da yeniden çizilir; paint() blob URL'lerini serbest bıraktığı için show() ondan sonra
+      if (r) { list[idx] = r; await load(); paint(); show(); toast('Fotoğraf güncellendi', { kind: 'ok' }); }
     };
     v.querySelector('[data-act=delete]').onclick = async () => {
       const ph = list[idx];
@@ -626,8 +627,7 @@ export async function render(root, { id, tab = 'genel' }) {
       toast('Fotoğraf silindi');
       if (!list.length) { close(); refresh(); return; }
       idx = Math.min(idx, list.length - 1);
-      await load(); show();
-      paint();
+      await load(); paint(); show();
     };
     // Dokunmatik kaydırma
     let sx = null;
