@@ -1,14 +1,16 @@
 /* Ayarlar: veri temizleme, sürüm (PIN ve yedekleme sonraki aşamada) */
 import { counts, clearAllData } from '../db.js';
-import { esc, icon, toast, confirmDialog } from '../ui.js';
+import { esc, icon, toast, confirmDialog, actionMenu } from '../ui.js';
 import { setTopbar } from '../nav.js';
 import { storageInfo, requestPersist, fmtBytes, downloadBackup, pickBackupFile, restoreBackup } from '../storage.js';
+import { hasPin, getLockDelay, setLockDelay, clearPin, setupPinFlow, requirePin, LOCK_DELAYS } from '../lock.js';
 
-export const APP_VERSION = '0.1.8';
+export const APP_VERSION = '0.1.9';
 
 export async function render(root) {
   setTopbar({ title: 'Ayarlar' });
-  const [c, st] = await Promise.all([counts(), storageInfo()]);
+  const [c, st, pinOn, lockDelay] = await Promise.all([counts(), storageInfo(), hasPin(), getLockDelay()]);
+  const delayLabel = (LOCK_DELAYS.find(([v]) => v === lockDelay) || [0, 'Hemen'])[1];
   const modeTitle = st.inApp ? 'Uygulama içi tarayıcı' : st.standalone ? 'Ana ekran uygulaması' : 'Tarayıcı sekmesi';
   const modeSub = st.inApp
     ? 'Veriler kalıcı olmayabilir. Safari veya Chrome ile açıp ana ekrana ekleyin.'
@@ -58,9 +60,11 @@ export async function render(root) {
     <section class="card section">
       <div class="card-head"><div class="card-title">Güvenlik</div></div>
       <div class="list">
-        <div class="row"><div class="avatar" style="background:var(--surface-3);color:var(--text-3)">${icon('lock')}</div>
-          <div class="row-main"><div class="row-title muted">PIN kilidi</div><div class="row-sub">Sonraki aşamada eklenecek.</div></div></div>
+        <button class="row" data-act="pin"><div class="avatar" style="background:${pinOn ? 'var(--ok-soft);color:var(--ok)' : 'var(--surface-3);color:var(--text-2)'}">${icon('lock')}</div>
+          <div class="row-main"><div class="row-title">PIN kilidi ${pinOn ? '<span class="pill pill-ok">Açık</span>' : ''}</div>
+            <div class="row-sub">${pinOn ? `Arka plana alındıktan ${esc(delayLabel === 'Hemen' ? 'hemen sonra' : delayLabel + ' sonra')} kilitlenir.` : 'Uygulamayı açarken ve arka plandan dönerken PIN sorulur.'}</div></div>${icon('chevron', 'muted-3')}</button>
       </div>
+      ${pinOn ? '' : '<p class="xs muted-3" style="padding:8px 16px 12px;margin:0">Hasta verisi taşıyan bir cihazda PIN kilidi açık olmalıdır.</p>'}
     </section>
 
     <p class="xs muted-3 section" style="text-align:center">Hasta Takip · sürüm ${APP_VERSION}</p>`;
@@ -86,6 +90,31 @@ export async function render(root) {
     const ok = await requestPersist();
     toast(ok ? 'Kalıcı depolama açıldı' : 'Tarayıcı kalıcı depolamaya izin vermedi', { kind: ok ? 'ok' : 'default' });
     render(root);
+  };
+  root.querySelector('[data-act=pin]').onclick = async () => {
+    if (!pinOn) {
+      if (await setupPinFlow()) { toast('PIN kilidi açıldı', { kind: 'ok' }); render(root); }
+      return;
+    }
+    const v = await actionMenu('PIN kilidi', [
+      { label: 'PIN\'i değiştir', icon: 'edit', value: 'change' },
+      { label: `Kilitleme süresi · ${delayLabel}`, icon: 'clock', value: 'delay' },
+      { label: 'PIN kilidini kaldır', icon: 'trash', danger: true, value: 'remove' },
+    ]);
+    if (v === 'change') {
+      if (!(await requirePin())) return;
+      if (await setupPinFlow()) { toast('PIN değiştirildi', { kind: 'ok' }); render(root); }
+    } else if (v === 'delay') {
+      const d = await actionMenu('Arka plana alındıktan sonra kilitle', LOCK_DELAYS.map(([sec, label]) => ({ label: sec === lockDelay ? `${label} ✓` : label, icon: 'clock', value: String(sec) })));
+      if (d == null) return;
+      await setLockDelay(Number(d));
+      render(root);
+    } else if (v === 'remove') {
+      if (!(await requirePin())) return;
+      await clearPin();
+      toast('PIN kilidi kaldırıldı');
+      render(root);
+    }
   };
   root.querySelector('[data-act=clear]').onclick = async () => {
     const ok = await confirmDialog({ title: 'Tüm veriler silinsin mi?', message: `${c.patients} hasta, ${c.photos} fotoğraf ve tüm randevular kalıcı olarak silinecek. Bu işlem geri alınamaz.`, okText: 'Hepsini sil', danger: true });

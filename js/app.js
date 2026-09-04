@@ -2,6 +2,7 @@
 import { openDB, migratePhotoBlobs } from './db.js';
 import { currentPath, setActiveNav } from './nav.js';
 import { requestPersist, renderNotice } from './storage.js';
+import { initLock } from './lock.js';
 import { toast, emptyState } from './ui.js';
 
 const routes = [
@@ -48,6 +49,8 @@ async function start() {
     document.getElementById('view').innerHTML = emptyState({ icon: 'alert', title: 'Veritabanı açılamadı', text: err.message });
     return;
   }
+  // PIN varsa önce kilit ekranı; açılana kadar hiçbir görünüm çizilmez
+  await initLock();
   window.addEventListener('hashchange', route);
   route();
   migratePhotoBlobs().catch(() => { /* en iyi çaba; bir sonraki açılışta yeniden denenir */ });
