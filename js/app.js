@@ -28,6 +28,11 @@ async function route() {
     if (!m) continue;
     setActiveNav(r.nav);
     window.scrollTo(0, 0);
+    root.classList.remove('has-hero');
+    // Yükleme sırasında iskelet (spinner yok)
+    root.innerHTML = r.nav === 'patients' && m[1]
+      ? ''
+      : '<div class="skeleton"><div class="sk title"></div><div class="sk line"></div><div class="sk block" style="margin-top:8px"></div><div class="sk row"></div><div class="sk row"></div><div class="sk row"></div></div>';
     try {
       const mod = await r.load();
       if (token !== renderToken) return;
@@ -35,7 +40,7 @@ async function route() {
       if (typeof result === 'function') cleanup = result;
     } catch (err) {
       console.error(err);
-      root.innerHTML = emptyState({ icon: 'alert', title: 'Bir hata oluştu', text: err.message || String(err), action: '<a class="btn btn-outline" href="#/">Ana sayfaya dön</a>' });
+      root.innerHTML = emptyState({ title: 'Bir hata oluştu', text: err.message || String(err), action: '<a class="btn btn-primary" href="#/">Ana sayfaya dön</a>' });
     }
     return;
   }
@@ -46,7 +51,7 @@ async function start() {
   try {
     await openDB();
   } catch (err) {
-    document.getElementById('view').innerHTML = emptyState({ icon: 'alert', title: 'Veritabanı açılamadı', text: err.message });
+    document.getElementById('view').innerHTML = emptyState({ title: 'Veritabanı açılamadı', text: err.message });
     return;
   }
   // PIN varsa önce kilit ekranı; açılana kadar hiçbir görünüm çizilmez

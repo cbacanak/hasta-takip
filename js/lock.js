@@ -68,7 +68,6 @@ export function pinEntry({ title, sub = '', length = null, minLength = 4, maxLen
       <div class="lock" role="dialog" aria-modal="true" aria-label="${esc(title)}">
         <div class="lock-head">${cancel ? `<button class="btn-icon" type="button" data-act="cancel" aria-label="Vazgeç">${icon('x')}</button>` : ''}</div>
         <div class="lock-body">
-          <div class="lock-mark">${icon('lock')}</div>
           <h2 class="lock-title">${esc(title)}</h2>
           <div class="lock-sub">${esc(sub)}</div>
           <div class="lock-dots" aria-live="polite"></div>
@@ -77,7 +76,7 @@ export function pinEntry({ title, sub = '', length = null, minLength = 4, maxLen
             ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button type="button" data-k="${n}">${n}</button>`).join('')}
             <button type="button" class="lock-ok ${length ? 'ghost' : ''}" data-act="ok" aria-label="Tamam" disabled ${length ? 'tabindex="-1"' : ''}>${icon('check')}</button>
             <button type="button" data-k="0">0</button>
-            <button type="button" class="lock-del" data-act="del" aria-label="Sil">${icon('back')}</button>
+            <button type="button" class="lock-del" data-act="del" aria-label="Sil">${icon('backspace')}</button>
           </div>
           ${forgot ? `<button type="button" class="lock-extra" data-act="forgot">PIN'i unuttum</button>` : ''}
         </div>
@@ -91,7 +90,7 @@ export function pinEntry({ title, sub = '', length = null, minLength = 4, maxLen
       dots.innerHTML = Array.from({ length: n }, (_, i) => `<span class="lock-dot ${i < val.length ? 'on' : ''}"></span>`).join('');
       ok.disabled = val.length < minLength;
     };
-    const showMsg = (t) => { msg.textContent = t || ''; };
+    const showMsg = (t) => { msg.textContent = t || ''; msg.classList.toggle('error', !!t); };
     const shake = () => { dots.classList.remove('shake'); void dots.offsetWidth; dots.classList.add('shake'); };
     const close = (result) => { document.removeEventListener('keydown', onKey); root.remove(); resolve(result); };
 
@@ -160,8 +159,8 @@ function forgotPanel(root, close) {
   root.querySelector('.lock-dots').classList.add('hidden');
   const panel = el(`
     <div class="lock-confirm">
-      <p class="muted small" style="margin:0">PIN yalnızca bu cihazda saklanır ve kurtarılamaz. Sıfırlamanın tek yolu <b>tüm hasta verilerini silmektir</b>. Yedeğiniz varsa sonra geri yükleyebilirsiniz.</p>
-      <button type="button" class="btn btn-danger" data-act="wipe">${icon('trash')}Tüm verileri sil ve PIN'i kaldır</button>
+      <p style="margin:0">PIN yalnızca bu cihazda saklanır ve kurtarılamaz. Sıfırlamanın tek yolu tüm hasta verilerini silmektir. Yedeğin varsa sonra geri yükleyebilirsin.</p>
+      <button type="button" class="btn btn-primary" data-act="wipe">Tüm verileri sil ve PIN'i kaldır</button>
       <button type="button" class="btn btn-ghost" data-act="back">Vazgeç</button>
     </div>`);
   body.appendChild(panel);
@@ -212,7 +211,7 @@ export async function initLock() {
 /* ---------------- Ayarlar akışları ---------------- */
 export async function setupPinFlow() {
   if (!cryptoAvailable()) { toast('PIN için güvenli bağlantı (https) gerekir', { kind: 'danger' }); return false; }
-  const first = await pinEntry({ title: 'Yeni PIN', sub: '4–6 haneli bir PIN belirleyin' });
+  const first = await pinEntry({ title: 'Yeni PIN', sub: '4 haneli bir PIN belirle', length: 4 });
   if (!first) return false;
   const second = await pinEntry({
     title: 'PIN\'i doğrulayın', sub: 'Aynı PIN\'i bir kez daha girin', length: first.length,

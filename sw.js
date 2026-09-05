@@ -1,10 +1,11 @@
 /* Service worker — uygulama kabuğunu çevrimdışı kullanım için önbelleğe alır */
-const VERSION = 'v0.1.11';
+const VERSION = 'v0.2.0';
 const CACHE = `hasta-takip-${VERSION}`;
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './css/tokens.css',
   './css/app.css',
   './js/app.js',
   './js/db.js',

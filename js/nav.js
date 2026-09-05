@@ -15,19 +15,18 @@ export function currentPath() {
 }
 
 /**
- * Üst çubuğu ayarlar.
- * actions: [{ icon, label, onClick, primary }]
+ * Kompakt üst çubuk. Sayfa başlığı (anchor) ekrandayken görünmez; kaydırılınca belirir.
+ * actions: [{ icon, label, onClick }]  —  tone: 'inverse' lacivert çubuk (hasta kartı)
  */
-export function setTopbar({ title = '', back = null, actions = [], center = false, anchor = '.page-title' } = {}) {
+export function setTopbar({ title = '', back = null, actions = [], center = false, anchor = '.page-title', tone = '' } = {}) {
   const bar = document.getElementById('topbar');
+  bar.classList.toggle('inverse', tone === 'inverse');
   bar.innerHTML = `
     <div class="topbar-inner">
-      ${back !== null ? `<button class="btn-icon" type="button" data-back aria-label="Geri">${icon('back')}</button>` : ''}
+      ${back !== null ? `<button class="btn-icon" type="button" data-back aria-label="Geri">${icon('back')}</button>` : '<span style="width:8px"></span>'}
       <div class="topbar-title ${center ? 'center' : ''}">${esc(title)}</div>
       <div class="topbar-actions">
-        ${actions.map((a, i) => a.primary
-          ? `<button class="btn btn-primary btn-sm" type="button" data-i="${i}">${a.icon ? icon(a.icon) : ''}${esc(a.label)}</button>`
-          : `<button class="btn-icon" type="button" data-i="${i}" aria-label="${esc(a.label)}" title="${esc(a.label)}">${icon(a.icon)}</button>`).join('')}
+        ${actions.map((a, i) => `<button class="btn-icon" type="button" data-i="${i}" aria-label="${esc(a.label)}" title="${esc(a.label)}">${icon(a.icon)}</button>`).join('')}
       </div>
     </div>`;
   const b = bar.querySelector('[data-back]');

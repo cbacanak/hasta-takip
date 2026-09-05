@@ -13,6 +13,7 @@ gerekli olanlar yapılır.
 - [x] Yedek al / geri yükle (fotoğraflarla tek dosya)
 - [x] Kalıcı depolama isteği ve riskli tarayıcı uyarıları
 - [x] PIN kilidi (PBKDF2 ile saklanır, açılışta ve arka plandan dönüşte sorulur, deneme frenleme)
+- [x] Tasarım sistemi v2 "Gece Laciverti" (TASARIM.md): token dosyası, tüm ekranlar yeniden yazıldı
 
 ## Mobil uygulama için öncelikli
 
@@ -29,6 +30,12 @@ gerekli olanlar yapılır.
    isteğe bağlı çevrimiçi randevu alma.
 7. **Klinik kayıt derinliği.** İlaç ve alerji listesi, ameliyat notu şablonları,
    ölçüm ve implant kaydı, işlem başına fiyat/ödeme takibi.
+
+## Tasarım (TASARIM.md §7 kalanlar)
+
+- [ ] Ekran geçişinde iOS tarzı geri kayma (şu an yalnızca giriş animasyonu var)
+- [ ] Butonlarda haptik geri bildirim (native'de)
+- [ ] Karşılaştırma ekranında kaydırmalı (slider) mod
 
 ## Küçük iyileştirmeler
 

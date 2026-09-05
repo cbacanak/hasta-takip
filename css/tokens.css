@@ -1,0 +1,75 @@
+/* Hasta Takip — tasarım token'ları (TASARIM.md §2–§4, §6)
+ * Tüm renk, tipografi, boşluk, yarıçap ve hareket değerleri buradan okunur.
+ * Bileşenlerde hex kullanılmaz. Mobil uygulamaya geçişte bu dosya tek "theme" nesnesine çevrilir. */
+:root {
+  /* Zemin */
+  --bg:            #F5F4F0;
+  --bg-elevated:   #FFFFFF;
+  --bg-subtle:     #EAE8E1;
+  --bg-inverse:    #0B1326;
+  --bg-inverse-key: #16213A;   /* PIN tuşu */
+  --bg-inverse-key-active: #22304F;
+
+  /* Metin (açık zemin) */
+  --text:           #0B1326;
+  --text-secondary: #6B7185;
+  --text-tertiary:  #B0B3BC;
+  --text-tabbar-off: #A3A6AE;
+
+  /* Metin (lacivert zemin) */
+  --text-on-inverse:           #F5F4F0;
+  --text-on-inverse-secondary: #A9B0C2;
+  --text-on-inverse-tertiary:  #8B93A8;
+  --border-on-inverse:         #2A344D;
+
+  /* Çizgiler */
+  --hairline: #E8E6DF;
+  --divider:  #E1DFD8;
+
+  /* Durum — az kullan */
+  --danger:     #B3261E;
+  --danger-bg:  #F9E7E5;
+  --warning:    #8A5A00;
+  --warning-bg: #F7EBD3;
+
+  /* Fotoğraf */
+  --photo-placeholder: #C9C1B6;
+
+  /* Tipografi */
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fs-display: 32px;  --lh-display: 1.1;  --ls-display: -0.02em;
+  --fs-stat:    24px;
+  --fs-title:   16px;
+  --fs-body:    15px;
+  --fs-small:   14px;
+  --fs-caption: 13px;
+  --fs-label:   12px;  --ls-label: 0.06em;
+  --fw-regular: 400;
+  --fw-medium:  500;
+
+  /* Boşluk (4px ızgara) */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+  --page-x: 24px;          /* ekran yatay kenar boşluğu */
+  --section-gap: 24px;
+
+  /* Yarıçap */
+  --r-control: 14px;       /* buton, input */
+  --r-card: 16px;          /* kart, fotoğraf */
+  --r-photo: 14px;
+  --r-sheet: 24px;
+
+  /* Dokunma */
+  --tap: 44px;
+
+  /* Hareket */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 220ms;
+  --dur-fast: 100ms;
+
+  /* Yerleşim */
+  --tabbar-h: 56px;
+  --sidenav-w: 232px;
+  --content-w: 720px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}

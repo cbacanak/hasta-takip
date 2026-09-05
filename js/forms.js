@@ -50,8 +50,8 @@ function wireForm(s, onSubmit) {
 export function patientForm(existing = null) {
   const p = existing || {};
   const s = sheet({
-    title: existing ? 'Hastayı Düzenle' : 'Yeni Hasta',
-    footer: footer(existing ? 'Kaydet' : 'Hastayı Ekle'),
+    title: existing ? 'Hastayı düzenle' : 'Yeni hasta',
+    footer: footer(existing ? 'Kaydet' : 'Hastayı ekle'),
     content: `
       <form id="sheet-form" class="form" novalidate>
         <div class="form-row">
@@ -84,8 +84,8 @@ export function procedureForm({ patientId, existing = null }) {
   const p = existing || {};
   const isNew = !existing;
   const s = sheet({
-    title: isNew ? 'Yeni İşlem' : 'İşlemi Düzenle',
-    footer: footer(isNew ? 'İşlemi Ekle' : 'Kaydet'),
+    title: isNew ? 'Yeni işlem' : 'İşlemi düzenle',
+    footer: footer(isNew ? 'İşlemi ekle' : 'Kaydet'),
     content: `
       <form id="sheet-form" class="form" novalidate>
         ${selectField({ label: 'İşlem türü', name: 'type', value: p.type || 'Rinoplasti', options: PROCEDURE_TYPES, required: true })}
@@ -181,14 +181,13 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
   let files = [];
 
   const s = sheet({
-    title: 'Fotoğraf Ekle',
+    title: 'Fotoğraf ekle',
     size: 'md',
     footer: footer('Ekle'),
     content: `
       <form id="sheet-form" class="form" novalidate>
         <input type="file" name="files" accept="image/*" multiple class="hidden" id="photo-input">
         <div class="upload-zone" id="zone" role="button" tabindex="0">
-          ${icon('image')}
           <b>Galeriden seç</b>
           <span>Birden fazla fotoğraf seçebilirsiniz. Küçültülmüş kopya saklanır, orijinal cihazınızda kalır.</span>
         </div>
@@ -300,7 +299,7 @@ export async function photoEditForm(photo, procedures = []) {
   const procOpts = [['', 'Bağlı işlem yok'], ...procedures.map((pr) => [pr.id, `${pr.type} · ${fmtDate(pr.date)}`])];
   let phase = photo.phase;
   const s = sheet({
-    title: 'Fotoğraf Bilgileri',
+    title: 'Fotoğraf bilgileri',
     footer: footer('Kaydet'),
     content: `
       <form id="sheet-form" class="form" novalidate>
