@@ -131,8 +131,14 @@ export function pinEntry({ title, sub = '', length = null, minLength = 4, maxLen
       else if (e.key === 'Escape' && cancel) close(null);
     };
 
-    root.querySelectorAll('[data-k]').forEach((b) => { b.onclick = () => press(b.dataset.k); });
-    root.querySelector('[data-act=del]').onclick = del;
+    // Dokunmatikte touchend ile hemen tepki ver (çift dokunuş algısı ve 300 ms gecikme olmaz); click fare/klavye için kalır
+    const tap = (btn, fn) => {
+      let touched = false;
+      btn.addEventListener('touchend', (e) => { e.preventDefault(); touched = true; fn(); }, { passive: false });
+      btn.addEventListener('click', () => { if (touched) { touched = false; return; } fn(); });
+    };
+    root.querySelectorAll('[data-k]').forEach((b) => tap(b, () => press(b.dataset.k)));
+    tap(root.querySelector('[data-act=del]'), del);
     ok.onclick = submit;
     const c = root.querySelector('[data-act=cancel]');
     if (c) c.onclick = () => close(null);
