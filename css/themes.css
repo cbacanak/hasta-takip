@@ -1,0 +1,124 @@
+/* Tema yönleri — html[data-theme] ile seçilir. Belirteçler app.css :root değerlerini geçersiz kılar. */
+
+/* 1) FİLDİŞİ — sıcak fildişi zemin, koyu orman yeşili vurgu, altın detay, serif başlık */
+html[data-theme="ivory"] {
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --surface-2: #f2eee5;
+  --surface-3: #eae5da;
+  --border: #e6e0d3;
+  --border-strong: #d2cab8;
+  --text: #1d1b16;
+  --text-2: #5a564d;
+  --text-3: #948d80;
+  --accent: #1f4d3a;
+  --accent-hover: #17402f;
+  --accent-soft: #e6ede7;
+  --accent-text: #1a4231;
+  --ok: #2f6b45;      --ok-soft: #e4efe6;
+  --warn: #9a6a1e;    --warn-soft: #f7ecd6;
+  --danger: #9b2c2c;  --danger-soft: #f6e3e1;
+  --info: #3b5b8a;    --info-soft: #e6ecf5;
+  --before: #7a5a3a;  --before-soft: #f0e7dc;
+  --after: #1f4d3a;   --after-soft: #e6ede7;
+  --radius: 12px; --radius-sm: 9px; --radius-xs: 6px;
+  --shadow-sm: 0 1px 1px rgba(40, 33, 20, .04);
+  --shadow: 0 1px 2px rgba(40, 33, 20, .04), 0 8px 24px rgba(40, 33, 20, .06);
+  --shadow-lg: 0 14px 44px rgba(40, 33, 20, .18);
+  --glass: rgba(246, 243, 236, .86); --glass-2: rgba(246, 243, 236, .92);
+  --on-accent: #f8f4ea;
+  --font-display: ui-serif, "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+html[data-theme="ivory"] .page-title, html[data-theme="ivory"] .profile-name { font-weight: 600; letter-spacing: -.01em; }
+html[data-theme="ivory"] .page-title { font-size: 28px; }
+html[data-theme="ivory"] .card-title, html[data-theme="ivory"] .stat-label { color: #a1783f; letter-spacing: .08em; font-size: 11px; }
+html[data-theme="ivory"] .avatar { background: #ece5d6; color: #4a3f2c; }
+html[data-theme="ivory"] .avatar.lg { font-family: var(--font-display); font-weight: 600; }
+html[data-theme="ivory"] .brand-mark { background: #1f4d3a; }
+html[data-theme="ivory"] .fab { box-shadow: 0 8px 24px rgba(31, 77, 58, .3); }
+html[data-theme="ivory"] .lock-mark { background: #e6ede7; color: #1f4d3a; }
+
+/* 2) GRAFİT — koyu, mat zemin; şampanya altını vurgu */
+html[data-theme="graphite"] {
+  color-scheme: dark;
+  --bg: #0f1113;
+  --surface: #171a1e;
+  --surface-2: #1c2025;
+  --surface-3: #242930;
+  --border: #272c33;
+  --border-strong: #3a414a;
+  --text: #f3f1ec;
+  --text-2: #b3b8c0;
+  --text-3: #7c838d;
+  --accent: #d4b46a;
+  --accent-hover: #c5a55b;
+  --accent-soft: rgba(212, 180, 106, .14);
+  --accent-text: #e2c67e;
+  --ok: #7fbf8f;      --ok-soft: rgba(127, 191, 143, .14);
+  --warn: #e0a85a;    --warn-soft: rgba(224, 168, 90, .14);
+  --danger: #e07a7a;  --danger-soft: rgba(224, 122, 122, .14);
+  --info: #86a8e0;    --info-soft: rgba(134, 168, 224, .14);
+  --before: #b89ad8;  --before-soft: rgba(184, 154, 216, .14);
+  --after: #d4b46a;   --after-soft: rgba(212, 180, 106, .14);
+  --radius: 14px; --radius-sm: 10px; --radius-xs: 7px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 16px 50px rgba(0, 0, 0, .6);
+  --glass: rgba(15, 17, 19, .82); --glass-2: rgba(15, 17, 19, .9);
+  --on-accent: #1a160c;
+  --font-display: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+}
+html[data-theme="graphite"] .page-title, html[data-theme="graphite"] .profile-name { font-weight: 600; }
+html[data-theme="graphite"] .page-title { font-size: 28px; }
+html[data-theme="graphite"] .card-title, html[data-theme="graphite"] .stat-label { color: var(--accent-text); letter-spacing: .08em; font-size: 11px; }
+html[data-theme="graphite"] .avatar { background: #262b32; color: #e2c67e; }
+html[data-theme="graphite"] .brand-mark { background: var(--accent); color: var(--on-accent); }
+html[data-theme="graphite"] .tab.on { color: var(--accent); }
+html[data-theme="graphite"] .fab { box-shadow: 0 8px 24px rgba(212, 180, 106, .25); }
+html[data-theme="graphite"] .lock-pad button { background: #1c2025; color: var(--text); }
+html[data-theme="graphite"] .lock-pad button:active { background: #2a3038; }
+html[data-theme="graphite"] .lock-mark { background: var(--accent-soft); color: var(--accent-text); }
+html[data-theme="graphite"] .toast { background: #2a3038; color: var(--text); }
+html[data-theme="graphite"] .sheet-backdrop { background: rgba(0, 0, 0, .6); }
+html[data-theme="graphite"] .compare-bar .btn-primary { background: var(--surface-3); color: var(--text); }
+
+/* 3) PORSELEN — soğuk, çok sade; siyaha yakın vurgu, ince çizgiler, editoryal serif */
+html[data-theme="porcelain"] {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-3: #ececee;
+  --border: #e8e8ea;
+  --border-strong: #d4d4d8;
+  --text: #121212;
+  --text-2: #5b5b60;
+  --text-3: #9a9aa0;
+  --accent: #1a1a1a;
+  --accent-hover: #000000;
+  --accent-soft: #f0f0f1;
+  --accent-text: #1a1a1a;
+  --ok: #2e7d4f;      --ok-soft: #e8f3ec;
+  --warn: #a2681a;    --warn-soft: #f8efdf;
+  --danger: #b42323;  --danger-soft: #fbe9e9;
+  --info: #2f5aa8;    --info-soft: #e9eef8;
+  --before: #6b5ca5;  --before-soft: #eeebf7;
+  --after: #1f6f7a;   --after-soft: #e6f1f3;
+  --radius: 10px; --radius-sm: 8px; --radius-xs: 5px;
+  --shadow-sm: none;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .05);
+  --shadow-lg: 0 14px 44px rgba(0, 0, 0, .16);
+  --glass: rgba(250, 250, 250, .86); --glass-2: rgba(250, 250, 250, .92);
+  --on-accent: #ffffff;
+  --font-display: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+}
+html[data-theme="porcelain"] .page-title { font-size: 30px; font-weight: 500; letter-spacing: -.02em; }
+html[data-theme="porcelain"] .profile-name { font-weight: 500; font-size: 24px; }
+html[data-theme="porcelain"] .card { box-shadow: none; }
+html[data-theme="porcelain"] .card-title, html[data-theme="porcelain"] .stat-label { color: var(--text-3); letter-spacing: .1em; font-size: 10.5px; }
+html[data-theme="porcelain"] .avatar { background: #f0f0f1; color: #1a1a1a; }
+html[data-theme="porcelain"] .btn-outline { border-color: var(--border-strong); }
+html[data-theme="porcelain"] .tab.on, html[data-theme="porcelain"] .navlink.on { color: #1a1a1a; }
+html[data-theme="porcelain"] .brand-mark { background: #1a1a1a; }
+html[data-theme="porcelain"] .fab { box-shadow: 0 8px 24px rgba(0, 0, 0, .22); }
+html[data-theme="porcelain"] .lock-mark { background: #f0f0f1; color: #1a1a1a; }
+html[data-theme="porcelain"] .lock-pad .lock-ok { background: #1a1a1a; }

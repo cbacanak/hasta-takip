@@ -13,7 +13,10 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-<link rel="stylesheet" href="./css/app.css?v=0.1.11">
+<link rel="stylesheet" href="./css/app.css?v=0.1.12">
+<link rel="stylesheet" href="./css/themes.css?v=0.1.12">
+<script>/* Tema önizleme: ?theme=ivory|graphite|porcelain (hatırlanır); ?theme=default sıfırlar */
+(function(){try{var q=new URLSearchParams(location.search).get('theme');if(q){if(q==='default')localStorage.removeItem('hasta-takip:theme');else localStorage.setItem('hasta-takip:theme',q);}var t=localStorage.getItem('hasta-takip:theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body>
 <div id="app" class="app">
@@ -41,6 +44,6 @@
   </nav>
 </div>
 <div id="layer"></div>
-<script type="module" src="./js/app.js?v=0.1.11"></script>
+<script type="module" src="./js/app.js?v=0.1.12"></script>
 </body>
 </html>
