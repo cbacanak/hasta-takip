@@ -52,7 +52,8 @@ body {
 /* Sheet açıkken arka plan kilitli */
 body.scroll-locked { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; background: none; border: 0; padding: 0; }
+/* touch-action: manipulation — düğmelerde çift dokunuşla yakınlaştırma ve 300 ms gecikme olmaz */
+button { cursor: pointer; background: none; border: 0; padding: 0; touch-action: manipulation; }
 a { color: var(--accent-text); text-decoration: none; }
 h1, h2, h3, h4, p { margin: 0; }
 .muted { color: var(--text-2); }
@@ -494,7 +495,7 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; line-height
 /* Notlar */
 .note-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; white-space: pre-wrap; line-height: 1.5; }
 /* ---------------- PIN kilidi ---------------- */
-.lock { position: fixed; inset: 0; z-index: 300; background: var(--bg); display: flex; flex-direction: column; padding: calc(8px + var(--safe-t)) 16px calc(16px + var(--safe-b)); }
+.lock { position: fixed; inset: 0; z-index: 300; background: var(--bg); display: flex; flex-direction: column; padding: calc(8px + var(--safe-t)) 16px calc(16px + var(--safe-b)); touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .lock-head { display: flex; align-items: center; min-height: 40px; }
 .lock-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 100%; max-width: 320px; margin: 0 auto; }
 .lock-mark { width: 52px; height: 52px; border-radius: 16px; background: var(--accent-soft); color: var(--accent-text); display: grid; place-items: center; margin-bottom: 6px; }
