@@ -1,5 +1,5 @@
 /* Service worker — uygulama kabuğunu çevrimdışı kullanım için önbelleğe alır */
-const VERSION = 'v0.1.9';
+const VERSION = 'v0.1.10';
 const CACHE = `hasta-takip-${VERSION}`;
 const SHELL = [
   './',

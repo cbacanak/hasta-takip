@@ -5,7 +5,7 @@ import { setTopbar } from '../nav.js';
 import { storageInfo, requestPersist, fmtBytes, downloadBackup, pickBackupFile, restoreBackup } from '../storage.js';
 import { hasPin, getLockDelay, setLockDelay, clearPin, setupPinFlow, requirePin, LOCK_DELAYS } from '../lock.js';
 
-export const APP_VERSION = '0.1.9';
+export const APP_VERSION = '0.1.10';
 
 export async function render(root) {
   setTopbar({ title: 'Ayarlar' });

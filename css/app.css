@@ -511,6 +511,8 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; line-height
 .lock-pad button:active { background: var(--border-strong); }
 .lock-pad .lock-ok { background: var(--accent); color: #fff; }
 .lock-pad .lock-ok:disabled { opacity: .35; }
+/* Hane sayısı sabitken Tamam gerekmez; hücresi korunur ki 0 ortada kalsın */
+.lock-pad .lock-ok.ghost { visibility: hidden; pointer-events: none; }
 .lock-pad .lock-del { background: transparent; }
 .lock-pad .ic { width: 24px; height: 24px; }
 .lock-extra { margin-top: 16px; color: var(--accent-text); font-weight: 500; font-size: 14px; padding: 8px 12px; }

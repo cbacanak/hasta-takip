@@ -75,7 +75,7 @@ export function pinEntry({ title, sub = '', length = null, minLength = 4, maxLen
           <div class="lock-msg" role="alert"></div>
           <div class="lock-pad">
             ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button type="button" data-k="${n}">${n}</button>`).join('')}
-            <button type="button" class="lock-ok ${length ? 'hidden' : ''}" data-act="ok" aria-label="Tamam" disabled>${icon('check')}</button>
+            <button type="button" class="lock-ok ${length ? 'ghost' : ''}" data-act="ok" aria-label="Tamam" disabled ${length ? 'tabindex="-1"' : ''}>${icon('check')}</button>
             <button type="button" data-k="0">0</button>
             <button type="button" class="lock-del" data-act="del" aria-label="Sil">${icon('back')}</button>
           </div>
