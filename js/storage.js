@@ -83,7 +83,6 @@ export function renderNotice(host) {
   if (!n || (n.dismissable && dismissed(n.id))) return;
   host.innerHTML = `
     <div class="notice notice-${n.kind}" role="status">
-      ${icon(n.kind === 'info' ? 'info' : 'alert')}
       <div class="notice-main"><b>${esc(n.title)}</b><div>${esc(n.text)}</div></div>
       ${n.dismissable ? `<button class="btn-icon" type="button" data-act="dismiss" aria-label="Kapat">${icon('x')}</button>` : ''}
     </div>`;

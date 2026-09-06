@@ -53,6 +53,8 @@ const ICONS = {
   left: '<path d="m15 18-6-6 6-6"/>',
   right: '<path d="m9 18 6-6-6-6"/>',
   zoom: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/>',
+  backspace: '<path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="m18 9-6 6M12 9l6 6"/>',
+  swap: '<path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>',
 };
 
 export function icon(name, cls = '') {
@@ -225,9 +227,9 @@ export function confirmDialog({ title = 'Emin misiniz?', message = '', okText = 
   const s = sheet({
     title,
     size: 'sm',
-    content: `<p class="muted" style="margin:0 0 4px">${esc(message)}</p>`,
+    content: `<p class="t-secondary" style="margin:0 0 8px;line-height:1.5">${esc(message)}</p>`,
     footer: `<button class="btn btn-ghost" data-act="cancel">${esc(cancelText)}</button>
-             <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-act="ok">${esc(okText)}</button>`,
+             <button class="btn ${danger ? 'btn-text-danger' : 'btn-primary'}" data-act="ok">${esc(okText)}</button>`,
   });
   s.el.querySelector('[data-act=cancel]').onclick = () => s.close(false);
   s.el.querySelector('[data-act=ok]').onclick = () => s.close(true);
@@ -241,7 +243,7 @@ export function actionMenu(title, items) {
     size: 'sm',
     content: `<div class="menu">${items.map((it, i) => `
       <button class="menu-item ${it.danger ? 'danger' : ''}" data-i="${i}" type="button">
-        ${it.icon ? icon(it.icon) : ''}<span>${esc(it.label)}</span>
+        ${it.icon ? icon(it.icon) : ''}<span>${esc(it.label)}</span>${it.checked ? `<span class="check-mark">${icon('check')}</span>` : ''}
       </button>`).join('')}</div>`,
   });
   s.body.querySelectorAll('.menu-item').forEach((b) => {
@@ -277,7 +279,7 @@ export function field({ label, name, type = 'text', value = '', placeholder = ''
   const isDate = type === 'date' || type === 'time' || type === 'datetime-local';
   return `
     <label class="field">
-      <span class="field-label">${esc(label)}${required ? ' <b class="req">*</b>' : ''}</span>
+      <span class="field-label">${esc(label)}</span>
       ${isDate ? `<span class="date-wrap">${input}</span>` : input}
       ${hint ? `<span class="field-hint">${esc(hint)}</span>` : ''}
     </label>`;
@@ -286,7 +288,7 @@ export function field({ label, name, type = 'text', value = '', placeholder = ''
 export function selectField({ label, name, value = '', options = [], required = false, hint = '' }) {
   return `
     <label class="field">
-      <span class="field-label">${esc(label)}${required ? ' <b class="req">*</b>' : ''}</span>
+      <span class="field-label">${esc(label)}</span>
       <span class="select-wrap">
         <select class="input" name="${name}" ${required ? 'required' : ''}>
           ${options.map((o) => {
@@ -325,20 +327,17 @@ export function bindSegmented(segEl, onChange) {
   });
 }
 
-export function statusPill(status) {
-  const map = {
-    planned: ['Planlı', 'pill-info'],
-    done: ['Yapıldı', 'pill-ok'],
-    missed: ['Gelmedi', 'pill-warn'],
-    cancelled: ['İptal', 'pill-muted'],
-  };
+/** Durum düz metin olarak; renk yalnızca gerektiğinde (gecikmiş / gelmedi) */
+export function statusText(status, { overdue = false, today = false } = {}) {
+  if (overdue) return '<span class="status danger">Gecikti</span>';
+  const map = { planned: [today ? 'Bugün' : 'Planlı', ''], done: ['Yapıldı', 'muted'], missed: ['Gelmedi', 'warning'], cancelled: ['İptal', 'muted'] };
   const [l, c] = map[status] || [status, ''];
-  return `<span class="pill ${c}">${esc(l)}</span>`;
+  return `<span class="status ${c}">${esc(l)}</span>`;
 }
+export const statusPill = statusText;
 
-export function emptyState({ icon: ic = 'info', title, text = '', action = '' }) {
-  return `<div class="empty">
-    <div class="empty-icon">${icon(ic)}</div>
+export function emptyState({ title, text = '', action = '', center = false }) {
+  return `<div class="empty ${center ? 'center' : ''}">
     <div class="empty-title">${esc(title)}</div>
     ${text ? `<div class="empty-text">${esc(text)}</div>` : ''}
     ${action}
