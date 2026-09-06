@@ -13,8 +13,10 @@ import { setTopbar, go, replacePath } from '../nav.js';
 const TABS = [['genel', 'Genel'], ['islemler', 'İşlemler'], ['fotograflar', 'Fotoğraflar'], ['randevular', 'Randevular']];
 const lower = (s) => String(s || '').toLocaleLowerCase('tr');
 
-export async function render(root, { id, tab = 'genel' }) {
-  const state = { id, tab: TABS.some(([k]) => k === tab) ? tab : 'genel', photoFilter: 'all', compare: false, selected: { before: null, after: null } };
+const DEFAULT_TAB = 'islemler';
+
+export async function render(root, { id, tab = DEFAULT_TAB }) {
+  const state = { id, tab: TABS.some(([k]) => k === tab) ? tab : DEFAULT_TAB, photoFilter: 'all', compare: false, selected: { before: null, after: null } };
   let data;
 
   async function load() {
