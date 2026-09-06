@@ -400,7 +400,7 @@ textarea.input { height: auto; padding: 12px 16px; resize: vertical; line-height
 .cal-dot.done { background: var(--text-tertiary); }
 .cal-dot.warn { background: var(--warning); }
 .cal-cell.out .cal-dot { opacity: .4; }
-.cal-more { font-size: 9px; font-style: normal; color: var(--text-secondary); line-height: 1; }
+.cal-more { font-size: var(--fs-label); font-style: normal; color: var(--text-secondary); line-height: 1; }
 @media (min-width: 640px) { .cal-cell { height: 56px; } }
 
 /* ---------------- Ayarlar ---------------- */

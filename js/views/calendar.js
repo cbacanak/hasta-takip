@@ -38,7 +38,24 @@ export async function render(root) {
           <div class="row-title">${esc(p ? fullName(p) : 'Silinmiş hasta')}</div>
           <div class="row-sub">${esc(sub)}</div>
         </div>
-        <div class="row-end">${statusText(a.status, { overdue, today: daysBetween(today, d) === 0 })}</div>
+        <div class="row-end">${a.status === 'planned' && !overdue ? `<span class="status">${esc(daysLeft(d))}</span>` : statusText(a.status, { overdue, today: daysBetween(today, d) === 0 })}</div>
+      </button>`;
+  };
+  /** Planlı randevular için "Bugün", "Yarın", "6 gün" */
+  const daysLeft = (d) => { const n = daysBetween(today, d); return n === 0 ? 'Bugün' : n === 1 ? 'Yarın' : `${n} gün`; };
+  const upcomingCard = (a) => {
+    const p = pById[a.patientId];
+    const pr = a.procedureId ? prById[a.procedureId] : null;
+    return `
+      <button class="upcoming-card" type="button" data-appt="${a.id}">
+        <div>
+          <div class="name">${esc(p ? fullName(p) : 'Silinmiş hasta')}</div>
+          <div class="sub">${[pr ? pr.type : null, lower(a.label), fmtTime(a.date)].filter(Boolean).map(esc).join(' · ')}</div>
+        </div>
+        <div>
+          <div class="date">${esc(fmtDayMonth(a.date))}</div>
+          <div class="rel">${esc(lower(daysLeft(parseDate(a.date))))}</div>
+        </div>
       </button>`;
   };
 
@@ -74,16 +91,20 @@ export async function render(root) {
     const overdue = appointments.filter((a) => a.status === 'planned' && parseDate(a.date) < today);
     const upcoming = appointments.filter((a) => parseDate(a.date) >= today && parseDate(a.date) <= horizon && a.status !== 'cancelled');
     const later = appointments.filter((a) => parseDate(a.date) > horizon && a.status === 'planned');
+    // En yakın planlı randevu lacivert kart olarak öne çıkar; kalanlar güne göre listelenir
+    const next = upcoming.find((a) => a.status === 'planned') || null;
+    const rest = upcoming.filter((a) => a !== next);
     const byDay = new Map();
-    upcoming.forEach((a) => { const k = a.date.slice(0, 10); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(a); });
+    rest.forEach((a) => { const k = a.date.slice(0, 10); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(a); });
 
     body.innerHTML = `
       ${overdue.length ? `<section class="section"><div class="section-label t-danger">Gecikmiş · ${overdue.length}</div><div class="list">${overdue.map((a) => row(a, { withDate: true })).join('')}</div></section>` : ''}
+      ${next ? `<section class="section"><div class="section-label">Yaklaşan kontrol</div>${upcomingCard(next)}</section>` : ''}
       ${byDay.size ? [...byDay.entries()].map(([k, list]) => {
         const n = daysBetween(today, parseDate(k));
         const title = n === 0 ? 'Bugün' : n === 1 ? 'Yarın' : `${weekdayShort(k)} · ${fmtDayMonth(k)}`;
         return `<section class="section"><div class="section-label">${esc(title)}</div><div class="list">${list.map((a) => row(a)).join('')}</div></section>`;
-      }).join('') : (overdue.length ? '' : emptyState({ title: 'Önümüzdeki 60 günde randevu yok', text: 'İşlem eklendiğinde kontrol takvimi buraya düşer.' }))}
+      }).join('') : (overdue.length || next ? '' : emptyState({ title: 'Önümüzdeki 60 günde randevu yok', text: 'İşlem eklendiğinde kontrol takvimi buraya düşer.' }))}
       ${later.length ? `<p class="t-caption section">60 günden sonra ${later.length} planlı randevu daha var.</p>` : ''}`;
     bindRows();
   }

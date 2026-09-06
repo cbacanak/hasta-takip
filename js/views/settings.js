@@ -5,7 +5,7 @@ import { setTopbar } from '../nav.js';
 import { storageInfo, requestPersist, fmtBytes, downloadBackup, pickBackupFile, restoreBackup } from '../storage.js';
 import { hasPin, getLockDelay, setLockDelay, clearPin, setupPinFlow, requirePin, LOCK_DELAYS } from '../lock.js';
 
-export const APP_VERSION = '0.2.1';
+export const APP_VERSION = '0.2.2';
 
 export async function render(root) {
   setTopbar({ title: 'Ayarlar' });
@@ -44,26 +44,26 @@ export async function render(root) {
 
     <section class="section">
       <div class="section-label">Güvenlik</div>
-      ${rowBtn('pin', 'PIN kilidi', pinOn ? `Arka plana alındıktan ${esc(delayLabel === 'Hemen' ? 'hemen sonra' : delayLabel + ' sonra')} kilitlenir.` : 'Açılışta ve arka plandan dönüşte PIN sorulur.', { value: pinOn ? 'Açık' : 'Kapalı' })}
+      ${rowBtn('pin', 'PIN kilidi', pinOn ? `${esc(delayLabel === 'Hemen' ? 'Arka planda hemen' : delayLabel + ' sonra')} kilitlenir` : '', { value: pinOn ? 'Açık' : 'Kapalı' })}
     </section>
 
     <section class="section">
       <div class="section-label">Yedekleme</div>
-      ${rowBtn('backup', 'Yedek al', 'Tüm veriler fotoğraflarla birlikte tek dosyaya kaydedilir.')}
-      ${rowBtn('restore', 'Yedeği geri yükle', 'Başka cihazdan veya Safari\'den alınan yedeği aktarır.')}
+      ${rowBtn('backup', 'Yedek al', '')}
+      ${rowBtn('restore', 'Yedeği geri yükle', '')}
     </section>
 
     <section class="section">
       <div class="section-label">Depolama</div>
-      ${rowInfo(esc(modeTitle), esc(modeSub))}
-      ${st.persisted === false ? rowBtn('persist', esc(persistTitle), esc(persistSub)) : rowInfo(esc(persistTitle), esc(persistSub))}
+      ${rowInfo(esc(modeTitle), st.inApp || (st.ios && !st.standalone) ? esc(modeSub) : '')}
+      ${st.persisted === false ? rowBtn('persist', esc(persistTitle), 'Dokunarak iste') : rowInfo(esc(persistTitle), '')}
       ${rowInfo('Kullanılan alan', '', `${esc(fmtBytes(st.usage))}${st.quota ? ` / ${esc(fmtBytes(st.quota))}` : ''}`)}
       ${rowInfo('Kayıtlar', '', `${c.patients} hasta · ${c.procedures} işlem · ${c.photos} fotoğraf · ${c.appointments} randevu`)}
     </section>
 
     <section class="section">
       <div class="section-label">Veri</div>
-      ${rowBtn('clear', 'Tüm verileri sil', 'Hasta, işlem, fotoğraf ve randevular kalıcı olarak silinir.', { danger: true })}
+      ${rowBtn('clear', 'Tüm verileri sil', '', { danger: true })}
     </section>
 
     <p class="t-caption section" style="color:var(--text-tertiary)">Hasta Takip · sürüm ${APP_VERSION}</p>

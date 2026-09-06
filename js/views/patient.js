@@ -240,12 +240,14 @@ export async function render(root, { id, tab = DEFAULT_TAB }) {
     const controls = controlsOf(pr.id);
     const done = controls.filter((c) => c.status === 'done').length;
     const photos = data.photos.filter((x) => x.procedureId === pr.id).length;
-    const sub = [fmtDate(pr.date), pr.anesthesia ? `${pr.anesthesia} anestezi` : null, controls.length ? `${done}/${controls.length} kontrol` : null, photos ? `${photos} fotoğraf` : null].filter(Boolean).join(' · ');
+    const line1 = [fmtDate(pr.date), pr.anesthesia ? `${pr.anesthesia} anestezi` : null].filter(Boolean).join(' · ');
+    const line2 = [controls.length ? `${done}/${controls.length} kontrol` : null, photos ? `${photos} fotoğraf` : null].filter(Boolean).join(' · ');
     return `
       <button class="row" type="button" data-proc="${pr.id}">
         <div class="row-main">
           <div class="row-title">${esc(pr.type)}${pr.title ? ` <span class="t-secondary">· ${esc(pr.title)}</span>` : ''}</div>
-          <div class="row-sub">${esc(sub)}</div>
+          <div class="row-sub">${esc(line1)}</div>
+          ${line2 ? `<div class="row-sub">${esc(line2)}</div>` : ''}
         </div>
         <div class="row-end">${icon('chevron')}</div>
       </button>`;
