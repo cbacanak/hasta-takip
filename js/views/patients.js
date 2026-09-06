@@ -98,7 +98,7 @@ export async function render(root) {
         <div class="section-label">${q ? `${rows.length} sonuç` : 'Tüm hastalar'}</div>
         <div class="list">${rows.map(patientRow).join('')}</div>
       </section>`;
-    list.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => go(`/patient/${b.dataset.open}/randevular`); });
+    list.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => go(`/patient/${b.dataset.open}`); });
   }
 
   input.addEventListener('input', () => { lastQuery = input.value; paint(); });
