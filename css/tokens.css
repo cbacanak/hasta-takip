@@ -35,6 +35,15 @@
   /* Fotoğraf */
   --photo-placeholder: #C9C1B6;
 
+  /* Türetilmiş çiftler — karanlıkta ters döner (TASARIM.md §2.1) */
+  --primary-bg:   var(--bg-inverse);
+  --primary-text: var(--text-on-inverse);
+  --upcoming-bg:     var(--bg-inverse);
+  --upcoming-text:   var(--text-on-inverse);
+  --upcoming-sub:    var(--text-on-inverse-secondary);
+  --upcoming-border: transparent;
+  color-scheme: light;
+
   /* Tipografi */
   --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --fs-display: 32px;  --lh-display: 1.1;  --ls-display: -0.02em;
@@ -53,7 +62,8 @@
   --section-gap: 24px;
 
   /* Yarıçap */
-  --r-control: 14px;       /* buton, input */
+  --r-control: 14px;       /* buton */
+  --r-input: 12px;         /* form girişi */
   --r-card: 16px;          /* kart, fotoğraf */
   --r-photo: 14px;
   --r-sheet: 24px;
@@ -72,4 +82,58 @@
   --content-w: 720px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
+}
+
+/* ---------------- Karanlık mod (§2.1) ---------------- */
+/* Aynı token adları, farklı değerler; bileşen kodu değişmez. Sistem tercihi izlenir,
+ * html[data-theme] ile ezilir (Ayarlar > Görünüm). Hero, PIN ve karşılaştırma ekranı her iki modda lacivert kalır. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:            #111827;
+    --bg-elevated:   #1A2234;
+    --bg-subtle:     #1E2738;
+    --bg-inverse:    #0B1326;
+    --text:          #F5F4F0;
+    --text-secondary:#A9B0C2;
+    --text-tertiary: #6B7185;
+    --text-tabbar-off: #6B7185;
+    --hairline:      #232B3D;
+    --divider:       #2A344D;
+    --danger:        #F28B82;
+    --danger-bg:     #3A1F1E;
+    --warning:       #E6B96A;
+    --warning-bg:    #3A2E14;
+    --photo-placeholder: #4A5063;
+    --primary-bg:   var(--text);
+    --primary-text: var(--bg-inverse);
+    --upcoming-bg:     var(--bg-elevated);
+    --upcoming-text:   var(--text);
+    --upcoming-sub:    var(--text-secondary);
+    --upcoming-border: var(--divider);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:            #111827;
+  --bg-elevated:   #1A2234;
+  --bg-subtle:     #1E2738;
+  --bg-inverse:    #0B1326;
+  --text:          #F5F4F0;
+  --text-secondary:#A9B0C2;
+  --text-tertiary: #6B7185;
+  --text-tabbar-off: #6B7185;
+  --hairline:      #232B3D;
+  --divider:       #2A344D;
+  --danger:        #F28B82;
+  --danger-bg:     #3A1F1E;
+  --warning:       #E6B96A;
+  --warning-bg:    #3A2E14;
+  --photo-placeholder: #4A5063;
+  --primary-bg:   var(--text);
+  --primary-text: var(--bg-inverse);
+  --upcoming-bg:     var(--bg-elevated);
+  --upcoming-text:   var(--text);
+  --upcoming-sub:    var(--text-secondary);
+  --upcoming-border: var(--divider);
+  color-scheme: dark;
 }
