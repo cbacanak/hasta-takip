@@ -55,6 +55,7 @@ const ICONS = {
   zoom: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/>',
   backspace: '<path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="m18 9-6 6M12 9l6 6"/>',
   swap: '<path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>',
+  share: '<path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
 };
 
 export function icon(name, cls = '') {
@@ -184,14 +185,14 @@ function unlockScroll() {
  * Alt sayfa (mobil) / diyalog (masaüstü). content: HTML string veya element.
  * Döner: { el, body, close(result) , result: Promise }
  */
-export function sheet({ title, content, footer = '', size = 'md', onClose } = {}) {
+export function sheet({ title, content, footer = '', size = 'md', onClose, closeText = 'Vazgeç' } = {}) {
   const root = el(`
     <div class="sheet-backdrop" role="presentation">
       <div class="sheet sheet-${size}" role="dialog" aria-modal="true" aria-label="${esc(title || '')}">
         <div class="sheet-head">
           <div class="sheet-grip" aria-hidden="true"></div>
           <h2 class="sheet-title">${esc(title || '')}</h2>
-          <button class="btn-icon sheet-close" type="button" aria-label="Kapat">${icon('x')}</button>
+          <button class="sheet-close" type="button">${esc(closeText)}</button>
         </div>
         <div class="sheet-body"></div>
         ${footer ? `<div class="sheet-foot">${footer}</div>` : ''}
@@ -223,17 +224,36 @@ export function sheet({ title, content, footer = '', size = 'md', onClose } = {}
   return { el: root, body, close, result };
 }
 
+/** Silme / geri alınamaz eylem onayı — alttan çıkan iOS eylem sayfası (TASARIM.md §5) */
 export function confirmDialog({ title = 'Emin misiniz?', message = '', okText = 'Evet', cancelText = 'Vazgeç', danger = false } = {}) {
-  const s = sheet({
-    title,
-    size: 'sm',
-    content: `<p class="t-secondary" style="margin:0 0 8px;line-height:1.5">${esc(message)}</p>`,
-    footer: `<button class="btn btn-ghost" data-act="cancel">${esc(cancelText)}</button>
-             <button class="btn ${danger ? 'btn-text-danger' : 'btn-primary'}" data-act="ok">${esc(okText)}</button>`,
+  return new Promise((resolve) => {
+    const root = el(`
+      <div class="action-sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+        <div class="as-group">
+          <div class="as-card">
+            <div class="as-head"><div class="as-title">${esc(title)}</div>${message ? `<div class="as-text">${esc(message)}</div>` : ''}</div>
+            <button class="as-btn ${danger ? 'danger' : 'primary'}" type="button" data-act="ok">${esc(okText)}</button>
+          </div>
+          <button class="as-cancel" type="button" data-act="cancel">${esc(cancelText)}</button>
+        </div>
+      </div>`);
+    let done = false;
+    const close = (v) => {
+      if (done) return; done = true;
+      root.classList.remove('open');
+      document.removeEventListener('keydown', onKey);
+      unlockScroll();
+      setTimeout(() => { root.remove(); resolve(v); }, 200);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(false); };
+    root.addEventListener('click', (e) => { if (e.target === root) close(false); });
+    root.querySelector('[data-act=ok]').onclick = () => close(true);
+    root.querySelector('[data-act=cancel]').onclick = () => close(false);
+    document.addEventListener('keydown', onKey);
+    lockScroll();
+    layer().appendChild(root);
+    requestAnimationFrame(() => root.classList.add('open'));
   });
-  s.el.querySelector('[data-act=cancel]').onclick = () => s.close(false);
-  s.el.querySelector('[data-act=ok]').onclick = () => s.close(true);
-  return s.result.then((v) => v === true);
 }
 
 /** Basit eylem menüsü: items [{label, icon, danger, value}] */
@@ -273,22 +293,27 @@ export function formData(form) {
   return out;
 }
 
-export function field({ label, name, type = 'text', value = '', placeholder = '', required = false, hint = '', attrs = '' }) {
+/** Alan etiketi: zorunlu değilse "· isteğe bağlı" (optional: false ile kapatılır) */
+export function fieldLabel(label, { required = false, optional = true } = {}) {
+  return `<span class="field-label">${esc(label)}${!required && optional ? ' <span class="opt">· isteğe bağlı</span>' : ''}</span>`;
+}
+
+export function field({ label, name, type = 'text', value = '', placeholder = '', required = false, optional = true, hint = '', attrs = '' }) {
   const input = `<input class="input" type="${type}" name="${name}" value="${esc(value)}" placeholder="${esc(placeholder)}" ${required ? 'required' : ''} ${attrs}>`;
-  // iOS Safari tarih/saat kutularına içsel genişlik dayatır; sabit boyutlu sarmalayıcı bunu geçersiz kılar
+  // iOS Safari tarih/saat kutularına içsel genişlik dayatır; sabit boyutlu sarmalayıcı bunu geçersiz kılar. Sağda ikon; dokununca native seçici.
   const isDate = type === 'date' || type === 'time' || type === 'datetime-local';
   return `
     <label class="field">
-      <span class="field-label">${esc(label)}</span>
-      ${isDate ? `<span class="date-wrap">${input}</span>` : input}
+      ${fieldLabel(label, { required, optional })}
+      ${isDate ? `<span class="date-wrap">${input}${icon(type === 'time' ? 'clock' : 'calendar', 'date-icon')}</span>` : input}
       ${hint ? `<span class="field-hint">${esc(hint)}</span>` : ''}
     </label>`;
 }
 
-export function selectField({ label, name, value = '', options = [], required = false, hint = '' }) {
+export function selectField({ label, name, value = '', options = [], required = false, optional = true, hint = '' }) {
   return `
     <label class="field">
-      <span class="field-label">${esc(label)}</span>
+      ${fieldLabel(label, { required, optional })}
       <span class="select-wrap">
         <select class="input" name="${name}" ${required ? 'required' : ''}>
           ${options.map((o) => {
@@ -301,10 +326,10 @@ export function selectField({ label, name, value = '', options = [], required = 
     </label>`;
 }
 
-export function textareaField({ label, name, value = '', placeholder = '', rows = 3 }) {
+export function textareaField({ label, name, value = '', placeholder = '', rows = 3, optional = true }) {
   return `
     <label class="field">
-      <span class="field-label">${esc(label)}</span>
+      ${fieldLabel(label, { required: false, optional })}
       <textarea class="input" name="${name}" rows="${rows}" placeholder="${esc(placeholder)}">${esc(value)}</textarea>
     </label>`;
 }
@@ -314,6 +339,52 @@ export function segmented({ name, value, options, cls = '' }) {
   return `<div class="seg ${cls}" role="tablist" data-name="${name}">
     ${options.map(([v, l]) => `<button type="button" role="tab" class="seg-btn ${String(v) === String(value) ? 'on' : ''}" data-value="${esc(v)}" aria-selected="${String(v) === String(value)}">${l}</button>`).join('')}
   </div>`;
+}
+
+/** Kısa seçim (cinsiyet, tema): segment kontrol + gizli input. bindChoiceFields(form) ile bağlanır. */
+export function segmentField({ label, name, value = '', options = [], required = false, optional = true }) {
+  return `
+    <div class="field">
+      ${label ? fieldLabel(label, { required, optional }) : ''}
+      <input type="hidden" name="${name}" value="${esc(value)}">
+      ${segmented({ name, value, options, cls: 'seg-field' })}
+    </div>`;
+}
+
+/** Çok seçenekli kısa liste (işlem türü, kontrol dönemleri): chip grubu + gizli input (çoklu seçimde virgülle) */
+export function chipField({ label, name, value = '', options = [], multiple = false, required = false, optional = true }) {
+  const selected = new Set(multiple ? String(value || '').split(',').filter(Boolean) : [String(value)]);
+  return `
+    <div class="field">
+      ${label ? fieldLabel(label, { required, optional }) : ''}
+      <input type="hidden" name="${name}" value="${esc(value)}">
+      <div class="chip-group" data-chips="${name}" data-multiple="${multiple ? '1' : ''}">
+        ${options.map((o) => { const [v, l] = Array.isArray(o) ? o : [o, o]; return `<button type="button" class="chip ${selected.has(String(v)) ? 'on' : ''}" data-value="${esc(v)}">${esc(l)}</button>`; }).join('')}
+      </div>
+    </div>`;
+}
+
+/** Formdaki segment ve chip alanlarını gizli input'larına bağlar */
+export function bindChoiceFields(form) {
+  form.querySelectorAll('.seg-field').forEach((seg) => {
+    const hidden = form.querySelector(`input[type=hidden][name="${seg.dataset.name}"]`);
+    bindSegmented(seg, (v) => { if (hidden) hidden.value = v; });
+  });
+  form.querySelectorAll('[data-chips]').forEach((group) => {
+    const hidden = form.querySelector(`input[type=hidden][name="${group.dataset.chips}"]`);
+    const multiple = !!group.dataset.multiple;
+    group.querySelectorAll('.chip').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (multiple) {
+          b.classList.toggle('on');
+          hidden.value = [...group.querySelectorAll('.chip.on')].map((x) => x.dataset.value).join(',');
+        } else {
+          group.querySelectorAll('.chip').forEach((x) => x.classList.toggle('on', x === b));
+          hidden.value = b.dataset.value;
+        }
+      });
+    });
+  });
 }
 
 export function bindSegmented(segEl, onChange) {

@@ -53,6 +53,39 @@ Tüm renkler `:root` içinde CSS değişkeni olarak tanımlanır; bileşenlerde 
 
 Not: Öncesi/Sonrası etiketleri renkli badge olmayacak; fotoğrafın altında `--text-secondary` renginde düz metin ("Öncesi · 11 Ağu").
 
+### 2.1 Karanlık mod
+
+Tema sistem ayarını izler (`prefers-color-scheme`), Ayarlar > Görünüm'den Açık / Koyu / Sistem olarak ezilebilir. Aynı token adları, farklı değerler; bileşen kodu hiç değişmez.
+
+```css
+@media (prefers-color-scheme: dark) { :root, [data-theme="dark"] {
+  --bg:            #111827;
+  --bg-elevated:   #1A2234;
+  --bg-subtle:     #1E2738;
+  --bg-inverse:    #0B1326;  /* hero aynı kalır, gövdeden bir ton koyu */
+
+  --text:          #F5F4F0;
+  --text-secondary:#A9B0C2;
+  --text-tertiary: #6B7185;
+
+  --hairline:      #232B3D;
+  --divider:       #2A344D;
+
+  --danger:        #F28B82;
+  --danger-bg:     #3A1F1E;
+  --warning:       #E6B96A;
+  --warning-bg:    #3A2E14;
+
+  --photo-placeholder: #4A5063;
+}}
+```
+
+Karanlıkta ters dönen şeyler:
+- Primary buton: zemin `--text` (fildişi), metin `--bg-inverse`. Yani açıkta lacivert/fildişi, koyuda fildişi/lacivert. Bunu `--primary-bg` / `--primary-text` token çifti ile çöz, doğrudan `--bg-inverse` kullanma.
+- "Yaklaşan kontrol" kartı: lacivert dolgu yerine `--bg-elevated` zemin + 1px `--divider` kenarlık.
+- Fotoğraf karşılaştırma ekranı her iki modda da lacivert; tema değişmez.
+- Hero ile gövde arasındaki fark koyuda azdır (#0B1326 / #111827); bu bilinçli, keskin geçiş istenmiyor.
+
 ## 3. Tipografi
 
 Font: iOS'ta `-apple-system` (SF Pro), diğerlerinde `Inter` (Google Fonts'tan yükle, 400 ve 500 ağırlıkları yeter). Sadece iki ağırlık kullanılır: 400 ve 500. 600/700 yok.
@@ -122,6 +155,36 @@ Kurallar: Cümle düzeni (sentence case), BÜYÜK HARF yok. Satır yüksekliği 
 - Yeni hasta / işlem / randevu formları alt sheet olarak açılır (üstten kaydırılabilir), zemin `--bg-elevated`, 24px üst yarıçap.
 - Input: `--bg-subtle` zemin, kenarlık yok, 14px yarıçap, 48px yükseklik, label input'un üstünde Caption. Focus: 1px `--text` kenarlık.
 
+### Fotoğraf karşılaştırma
+- Tam ekran, zemin `#0B1326`, her iki temada aynı. Üstte kapat (X) · "Karşılaştır" · paylaş.
+- Fotoğraflar 3px aralıkla yan yana, ekran yüksekliğinin ~%60'ı. Sol altta Caption etiket ("Öncesi · 11 Ağu"), sağ üstte açı/dönem ("Profil", "2. hafta").
+- Altta mod chip'leri: Yan yana / Kaydır (slider) / Üst üste (opaklık). Seçili chip fildişi dolgu.
+- En altta seçili "Sonrası" fotoğrafı ve "Değiştir" metin butonu; dokununca aynı işlemin fotoğraf listesi sheet olarak açılır.
+- Paylaş: iki fotoğrafı tek görsele birleştirip etiketleriyle dışa verir (hasta adı yazmaz).
+
+### Alt sheet formları (Yeni hasta, İşlem ekle, Randevu)
+- Arka plan `rgba(11,19,38,.45)` ile kararır. Sheet `--bg-elevated`, 24px üst yarıçap, 36×4 tutamaç.
+- Başlık satırı: 20px/500 başlık solda, "Vazgeç" metin butonu sağda `--text-secondary`.
+- Alan etiketi 12px `--text-secondary`, input'un üstünde. İsteğe bağlı alanlar etikette "· isteğe bağlı" (`--text-tertiary`).
+- Input: `--bg-subtle`, 44px, 12px yarıçap, kenarlıksız. Odakta zemin `--bg-elevated` + 1px `--text` kenarlık. Placeholder `--text-tertiary`.
+- Kısa seçimler (cinsiyet, tema) segment kontrol; çok seçenekli kısa listeler (işlem türü, kontrol dönemleri) chip grubu; uzun listeler (kan grubu) native seçici.
+- Tarih alanı sağda takvim ikonu, seçince native date picker.
+- Tek primary buton en altta, 46px, tam genişlik. Buton metni eylemi söyler: "Hastayı kaydet", "İşlemi kaydet".
+- Klavye açılınca sheet yukarı kayar, buton görünür kalır.
+
+### Boş durumlar
+- Dikey ortalanmış: 16px/500 başlık (eylem cümlesi: "İlk hastanı ekle", "Henüz fotoğraf yok") + 13px `--text-secondary` bir cümle açıklama + tam genişlik primary buton.
+- İllüstrasyon, ikon, emoji yok. Alt başlık listede "Henüz kayıt yok" olur.
+
+### Silme onayı
+- Alttan çıkan iOS action sheet: `--bg-elevated` kart, 18px yarıçap. Başlık "Elif Kaya silinsin mi?", açıklama neyin silineceğini sayar ve "Bu işlem geri alınamaz." ile biter.
+- Yıkıcı aksiyon `--danger` renkli, 500 ağırlık, kartın içinde. "Vazgeç" ayrı kart olarak altta.
+- `--danger` başka hiçbir yerde buton dolgusu olarak kullanılmaz.
+
+### Ayarlar
+- Bölüm etiketi Label stilinde, satırlar hairline ile ayrılır. Sağ tarafta değer + chevron (`--text-secondary`). Açıklama satırı sadece davranışı netleştirdiği yerlerde (PIN kilidi gibi).
+- Görünüm bölümü en üstte: Tema segment kontrolü (Açık / Koyu / Sistem).
+
 ## 6. Hareket ve his
 
 - Tüm geçişler 200–250ms, `cubic-bezier(0.2, 0.8, 0.2, 1)`. `prefers-reduced-motion` saygı gösterilir.
@@ -147,6 +210,8 @@ Kurallar: Cümle düzeni (sentence case), BÜYÜK HARF yok. Satır yüksekliği 
 - Pastel renkli avatarlar, renkli badge'ler
 - Her metnin önünde ikon
 - Birden fazla dolu buton
+- Karanlıkta hero'yu gövdeyle aynı renge çekmek veya saf siyah zemin
+- Boş durumlarda illüstrasyon/emoji
 - 600+ font ağırlığı, BÜYÜK HARF etiket
 - Gölge, gradient
 - Alfabetik bölüm başlıkları (küçük listelerde)

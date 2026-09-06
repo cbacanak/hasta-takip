@@ -14,6 +14,10 @@ gerekli olanlar yapılır.
 - [x] Kalıcı depolama isteği ve riskli tarayıcı uyarıları
 - [x] PIN kilidi (PBKDF2 ile saklanır, açılışta ve arka plandan dönüşte sorulur, deneme frenleme)
 - [x] Tasarım sistemi v2 "Gece Laciverti" (TASARIM.md): token dosyası, tüm ekranlar yeniden yazıldı
+- [x] Karanlık mod (sistem / açık / koyu, Ayarlar > Görünüm) — aynı token adları, farklı değerler
+- [x] Alt sheet formları: Vazgeç başlıkta, tek dolu buton, chip/segment seçimler, isteğe bağlı etiketi
+- [x] Silme onayı iOS eylem sayfası
+- [x] Karşılaştırma ekranı: yan yana / kaydır / üst üste, Değiştir, paylaş (tek görsel, hasta adı yok)
 
 ## Mobil uygulama için öncelikli
 
@@ -31,11 +35,11 @@ gerekli olanlar yapılır.
 7. **Klinik kayıt derinliği.** İlaç ve alerji listesi, ameliyat notu şablonları,
    ölçüm ve implant kaydı, işlem başına fiyat/ödeme takibi.
 
-## Tasarım (TASARIM.md §7 kalanlar)
+## Tasarım (TASARIM.md kalanlar)
 
 - [ ] Ekran geçişinde iOS tarzı geri kayma (şu an yalnızca giriş animasyonu var)
 - [ ] Butonlarda haptik geri bildirim (native'de)
-- [ ] Karşılaştırma ekranında kaydırmalı (slider) mod
+- [ ] Hero ikon butonlarında uzun basınca ipucu (native'de)
 
 ## Küçük iyileştirmeler
 

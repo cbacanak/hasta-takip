@@ -272,6 +272,7 @@ export async function render(root, { id, tab = DEFAULT_TAB }) {
     const s = sheet({
       title: pr.type,
       size: 'md',
+      closeText: 'Kapat',
       footer: `<button class="btn btn-ghost" type="button" data-act="more">Diğer</button><span class="spacer"></span>
                <button class="btn btn-secondary" type="button" data-act="edit">Düzenle</button>
                <button class="btn btn-primary" type="button" data-act="photo">Fotoğraf ekle</button>`,
@@ -555,35 +556,145 @@ export async function render(root, { id, tab = DEFAULT_TAB }) {
     show();
   }
 
+  /* ---------- Karşılaştırma (TASARIM.md §5 "Fotoğraf karşılaştırma") ---------- */
   function openCompare() {
-    const { before, after } = state.selected;
-    if (!before || !after) return;
-    const pr = (after.procedureId && data.procById[after.procedureId]) || (before.procedureId && data.procById[before.procedureId]) || null;
+    const sel = state.selected;
+    if (!sel.before || !sel.after) return;
+    let before = sel.before, after = sel.after;
+    let mode = 'side'; // side | slide | overlay
+    const prOf = (ph) => (ph.procedureId && data.procById[ph.procedureId]) || null;
+    const cap = (ph) => `${phaseLabel(ph)} · ${fmtDayMonth(ph.date)}`;
+    const corner = (ph) => { const pr = prOf(ph); return ph.phase === 'after' && pr ? sinceProcedure(pr.date, parseDate(ph.date)) : (ph.tags || [])[0] || ''; };
+
     const v = el(`
-      <div class="viewer" role="dialog" aria-modal="true" aria-label="Karşılaştırma">
+      <div class="viewer cmp" role="dialog" aria-modal="true" aria-label="Karşılaştır">
         <div class="viewer-head">
           <button class="btn-icon" type="button" data-act="close" aria-label="Kapat">${icon('x')}</button>
-          <div class="viewer-title">${esc(fullName(data.patient))}${pr ? ` · ${esc(pr.type)}` : ''}</div>
-          <button class="btn-icon" type="button" data-act="swap" aria-label="Yer değiştir">${icon('swap')}</button>
+          <div class="viewer-title">Karşılaştır</div>
+          <button class="btn-icon" type="button" data-act="share" aria-label="Paylaş">${icon('share')}</button>
         </div>
-        <div class="compare" style="padding-bottom:calc(16px + var(--safe-b))">
-          <div class="compare-pane">
-            <div class="compare-label"><b>Öncesi</b>${esc(fmtDate(before.date))}</div>
-            <div class="frame"><img src="${blobURL(before.id, before.blob)}" alt="Öncesi"></div>
-          </div>
-          <div class="compare-pane">
-            <div class="compare-label"><b>Sonrası</b>${esc(fmtDate(after.date))}${pr ? ` · ${esc(sinceProcedure(pr.date, parseDate(after.date)))}` : ''}</div>
-            <div class="frame"><img src="${blobURL(after.id, after.blob)}" alt="Sonrası"></div>
+        <div class="cmp-stage" id="cmp-stage"></div>
+        <div class="cmp-modes">
+          ${[['side', 'Yan yana'], ['slide', 'Kaydır'], ['overlay', 'Üst üste']].map(([k, l]) => `<button class="cmp-chip ${k === mode ? 'on' : ''}" type="button" data-mode="${k}">${l}</button>`).join('')}
+        </div>
+        <div class="cmp-foot">
+          <div class="cmp-pick">
+            <img class="cmp-thumb" alt="">
+            <div class="cmp-pick-main">
+              <div class="cmp-pick-title">Sonrası</div>
+              <div class="cmp-pick-sub"></div>
+            </div>
+            <button class="cmp-change" type="button" data-act="change">Değiştir</button>
           </div>
         </div>
       </div>`);
-    // Kapatınca seçim modu biter, galeri normal hâline döner
+    const stage = v.querySelector('#cmp-stage');
+
+    const pane = (ph, alt) => `
+      <div class="cmp-pane">
+        <img src="${blobURL(ph.id, ph.blob)}" alt="${alt}" draggable="false">
+        <span class="cmp-cap">${esc(cap(ph))}</span>
+        ${corner(ph) ? `<span class="cmp-corner">${esc(corner(ph))}</span>` : ''}
+      </div>`;
+
+    function paintStage() {
+      if (mode === 'side') {
+        stage.innerHTML = `<div class="cmp-side">${pane(before, 'Öncesi')}${pane(after, 'Sonrası')}</div>`;
+      } else if (mode === 'slide') {
+        stage.innerHTML = `
+          <div class="cmp-stack" id="cmp-stack">
+            <img class="base" src="${blobURL(before.id, before.blob)}" alt="Öncesi" draggable="false">
+            <img class="top" src="${blobURL(after.id, after.blob)}" alt="Sonrası" draggable="false" style="clip-path: inset(0 50% 0 0)">
+            <div class="cmp-handle" style="left:50%"></div>
+            <span class="cmp-cap">${esc(cap(before))}</span>
+            <span class="cmp-cap right">${esc(cap(after))}</span>
+          </div>
+          <input class="cmp-range" type="range" min="0" max="100" value="50" aria-label="Kaydır">`;
+        const top = stage.querySelector('.top'), handle = stage.querySelector('.cmp-handle'), range = stage.querySelector('.cmp-range');
+        const setPos = (pct) => { top.style.clipPath = `inset(0 ${100 - pct}% 0 0)`; handle.style.left = `${pct}%`; range.value = pct; };
+        range.oninput = () => setPos(+range.value);
+        const stack = stage.querySelector('#cmp-stack');
+        const fromEvent = (e) => { const r = stack.getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; setPos(Math.max(0, Math.min(100, (x / r.width) * 100))); };
+        let drag = false;
+        stack.addEventListener('pointerdown', (e) => { drag = true; fromEvent(e); });
+        stack.addEventListener('pointermove', (e) => { if (drag) fromEvent(e); });
+        window.addEventListener('pointerup', () => { drag = false; });
+      } else {
+        stage.innerHTML = `
+          <div class="cmp-stack">
+            <img class="base" src="${blobURL(before.id, before.blob)}" alt="Öncesi" draggable="false">
+            <img class="top" src="${blobURL(after.id, after.blob)}" alt="Sonrası" draggable="false" style="opacity:.5">
+            <span class="cmp-cap">${esc(cap(before))}</span>
+            <span class="cmp-cap right">${esc(cap(after))}</span>
+          </div>
+          <input class="cmp-range" type="range" min="0" max="100" value="50" aria-label="Opaklık">`;
+        const top = stage.querySelector('.top'), range = stage.querySelector('.cmp-range');
+        range.oninput = () => { top.style.opacity = String(+range.value / 100); };
+      }
+      v.querySelector('.cmp-thumb').src = blobURL(after.id + ':t', after.thumb || after.blob);
+      v.querySelector('.cmp-pick-sub').textContent = [fmtDate(after.date), corner(after)].filter(Boolean).join(' · ');
+    }
+
     const close = () => { document.removeEventListener('keydown', onKey); v.remove(); state.compare = false; paintTab(); };
     const onKey = (e) => { if (e.key === 'Escape') close(); };
     v.querySelector('[data-act=close]').onclick = close;
-    v.querySelector('[data-act=swap]').onclick = () => { const c = v.querySelector('.compare'); c.appendChild(c.firstElementChild); };
+    v.querySelectorAll('[data-mode]').forEach((b) => {
+      b.onclick = () => { mode = b.dataset.mode; v.querySelectorAll('[data-mode]').forEach((x) => x.classList.toggle('on', x === b)); paintStage(); };
+    });
+    v.querySelector('[data-act=change]').onclick = async () => {
+      const pr = prOf(after) || prOf(before);
+      const pool = data.photos.filter((x) => x.phase === 'after' && (!pr || x.procedureId === pr.id));
+      const picked = await pickPhotoSheet('Sonrası fotoğrafını seç', pool, after.id);
+      if (picked) { after = picked; state.selected.after = picked; paintStage(); }
+    };
+    v.querySelector('[data-act=share]').onclick = () => shareCompare(before, after, { cap, corner });
     document.addEventListener('keydown', onKey);
     document.getElementById('layer').appendChild(v);
+    paintStage();
+  }
+
+  /** Aynı işlemin fotoğraflarından seçim: sheet içinde 3 sütun küçük resim */
+  function pickPhotoSheet(title, pool, currentId) {
+    const s = sheet({
+      title, size: 'md',
+      content: pool.length ? `<div class="pick-grid">${pool.map((ph) => `
+        <button class="pick ${ph.id === currentId ? 'on' : ''}" type="button" data-pick="${ph.id}">
+          <img src="${blobURL(ph.id + ':t', ph.thumb || ph.blob)}" alt="">
+          <span>${esc(fmtDayMonth(ph.date))}${(ph.tags || [])[0] ? ` · ${esc(ph.tags[0])}` : ''}</span>
+        </button>`).join('')}</div>` : emptyState({ title: 'Seçilebilecek sonrası fotoğrafı yok' }),
+    });
+    s.body.querySelectorAll('[data-pick]').forEach((b) => { b.onclick = () => s.close(pool.find((x) => x.id === b.dataset.pick)); });
+    return s.result;
+  }
+
+  /** İki fotoğrafı etiketleriyle tek görsele birleştirip paylaşır (hasta adı yazmaz) */
+  async function shareCompare(before, after, { cap, corner }) {
+    const load = (ph) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = blobURL(ph.id, ph.blob); });
+    try {
+      const [a, b] = await Promise.all([load(before), load(after)]);
+      const H = 1200, gap = 12, pad = 24, label = 64;
+      const wa = Math.round(a.width * (H / a.height)), wb = Math.round(b.width * (H / b.height));
+      const c = document.createElement('canvas');
+      c.width = pad * 2 + wa + gap + wb; c.height = pad * 2 + H + label;
+      const x = c.getContext('2d');
+      x.fillStyle = '#0B1326'; x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(a, pad, pad, wa, H); x.drawImage(b, pad + wa + gap, pad, wb, H);
+      x.fillStyle = '#F5F4F0'; x.font = '500 30px -apple-system, Inter, sans-serif'; x.textBaseline = 'middle';
+      x.fillText(cap(before), pad, pad + H + label / 2);
+      x.fillText(cap(after), pad + wa + gap, pad + H + label / 2);
+      x.fillStyle = '#A9B0C2'; x.font = '400 26px -apple-system, Inter, sans-serif'; x.textAlign = 'right';
+      if (corner(before)) x.fillText(corner(before), pad + wa, pad + H + label / 2);
+      if (corner(after)) x.fillText(corner(after), pad + wa + gap + wb, pad + H + label / 2);
+      const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.9));
+      const file = new File([blob], 'karsilastirma.jpg', { type: 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: 'Karşılaştırma' }); return; } catch (e) { if (e?.name === 'AbortError') return; }
+      }
+      const url = URL.createObjectURL(file);
+      const link = document.createElement('a'); link.href = url; link.download = file.name; document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      toast('Görsel indirildi');
+    } catch (e) { toast('Paylaşım hazırlanamadı', { kind: 'danger' }); }
   }
 
   paint();

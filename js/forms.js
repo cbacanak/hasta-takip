@@ -1,8 +1,8 @@
 /* Formlar: hasta, işlem, randevu, fotoğraf */
 import { Patients, Procedures, Appointments, Photos } from './db.js';
-import { buildControls, todayISO, toLocalISO } from './schedule.js';
+import { buildControls, todayISO, toLocalISO, CONTROL_SCHEDULE } from './schedule.js';
 import { processImage, parseTags, readExifDate } from './photos.js';
-import { sheet, field, selectField, textareaField, segmented, bindSegmented, formData, esc, icon, toast, fmtDate } from './ui.js';
+import { sheet, field, selectField, textareaField, segmentField, chipField, bindChoiceFields, segmented, bindSegmented, formData, esc, icon, toast, fmtDate } from './ui.js';
 
 export const PROCEDURE_TYPES = [
   ...[
@@ -21,14 +21,14 @@ export const APPT_KINDS = [
 ];
 export const APPT_KIND_LABEL = Object.fromEntries(APPT_KINDS);
 
-function footer(okText = 'Kaydet', extra = '') {
-  return `${extra}<button class="btn btn-ghost" type="button" data-act="cancel">Vazgeç</button>
-          <button class="btn btn-primary" type="submit" form="sheet-form">${okText}</button>`;
+/* Tek dolu buton, tam genişlik; Vazgeç sheet başlığında */
+function footer(okText = 'Kaydet') {
+  return `<button class="btn btn-primary" type="submit" form="sheet-form">${okText}</button>`;
 }
 
 function wireForm(s, onSubmit) {
   const form = s.body.querySelector('form');
-  s.el.querySelector('[data-act=cancel]').onclick = () => s.close(null);
+  bindChoiceFields(form);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const err = form.querySelector('.form-error');
@@ -51,7 +51,7 @@ export function patientForm(existing = null) {
   const p = existing || {};
   const s = sheet({
     title: existing ? 'Hastayı düzenle' : 'Yeni hasta',
-    footer: footer(existing ? 'Kaydet' : 'Hastayı ekle'),
+    footer: footer('Hastayı kaydet'),
     content: `
       <form id="sheet-form" class="form" novalidate>
         <div class="form-row">
@@ -62,12 +62,10 @@ export function patientForm(existing = null) {
           ${field({ label: 'Telefon', name: 'phone', type: 'tel', value: p.phone, placeholder: '05xx xxx xx xx', attrs: 'inputmode="tel"' })}
           ${field({ label: 'Doğum tarihi', name: 'birthDate', type: 'date', value: p.birthDate })}
         </div>
-        <div class="form-row">
-          ${selectField({ label: 'Cinsiyet', name: 'gender', value: p.gender || '', options: [['', 'Belirtilmedi'], ['F', 'Kadın'], ['M', 'Erkek']] })}
-          ${selectField({ label: 'Kan grubu', name: 'bloodType', value: p.bloodType || '', options: [['', 'Bilinmiyor'], '0 Rh+', '0 Rh-', 'A Rh+', 'A Rh-', 'B Rh+', 'B Rh-', 'AB Rh+', 'AB Rh-'] })}
-        </div>
+        ${segmentField({ label: 'Cinsiyet', name: 'gender', value: p.gender || '', options: [['F', 'Kadın'], ['M', 'Erkek'], ['', 'Belirtilmedi']] })}
+        ${selectField({ label: 'Kan grubu', name: 'bloodType', value: p.bloodType || '', options: [['', 'Bilinmiyor'], '0 Rh+', '0 Rh-', 'A Rh+', 'A Rh-', 'B Rh+', 'B Rh-', 'AB Rh+', 'AB Rh-'] })}
         ${field({ label: 'E-posta', name: 'email', type: 'email', value: p.email, attrs: 'autocomplete="off"' })}
-        ${field({ label: 'Alerjiler', name: 'allergies', value: p.allergies, placeholder: 'Penisilin, lateks…', hint: 'Hasta kartında uyarı olarak gösterilir.' })}
+        ${field({ label: 'Alerjiler', name: 'allergies', value: p.allergies, placeholder: 'Penisilin, lateks…' })}
         ${field({ label: 'Yönlendiren', name: 'referral', value: p.referral, placeholder: 'Tavsiye, sosyal medya, hekim…' })}
         ${textareaField({ label: 'Notlar', name: 'notes', value: p.notes, placeholder: 'Sistemik hastalıklar, ilaçlar, sigara, beklentiler…' })}
       </form>`,
@@ -85,38 +83,35 @@ export function procedureForm({ patientId, existing = null }) {
   const isNew = !existing;
   const s = sheet({
     title: isNew ? 'Yeni işlem' : 'İşlemi düzenle',
-    footer: footer(isNew ? 'İşlemi ekle' : 'Kaydet'),
+    footer: footer('İşlemi kaydet'),
     content: `
       <form id="sheet-form" class="form" novalidate>
-        ${selectField({ label: 'İşlem türü', name: 'type', value: p.type || 'Rinoplasti', options: PROCEDURE_TYPES, required: true })}
+        ${chipField({ label: 'İşlem türü', name: 'type', value: p.type || 'Rinoplasti', options: PROCEDURE_TYPES, required: true })}
         ${field({ label: 'Açıklama / teknik', name: 'title', value: p.title, placeholder: 'Açık teknik, kıkırdak greft…' })}
         <div class="form-row">
           ${field({ label: 'İşlem tarihi', name: 'date', type: 'date', value: p.date || todayISO(), required: true })}
-          ${selectField({ label: 'Anestezi', name: 'anesthesia', value: p.anesthesia || 'Genel', options: ANESTHESIA })}
+          ${selectField({ label: 'Anestezi', name: 'anesthesia', value: p.anesthesia || 'Genel', options: ANESTHESIA, optional: false })}
         </div>
         ${textareaField({ label: 'Ameliyat notu', name: 'notes', value: p.notes, placeholder: 'Bulgular, uygulanan teknik, komplikasyon, öneriler…', rows: 4 })}
         ${isNew ? `
-        <label class="check">
-          <input type="checkbox" name="autoControls" checked>
-          <span>
-            <span class="check-title">Kontrol takvimini otomatik oluştur</span>
-            <span class="check-text">1. gün, 1. hafta, 1. ay, 3. ay, 6. ay ve 1. yıl kontrolleri randevu olarak eklenir. Pazar gününe düşenler pazartesiye alınır.</span>
-          </span>
-        </label>
+        ${chipField({ label: 'Kontrol takvimi', name: 'controls', value: CONTROL_SCHEDULE.map((c) => c.key).join(','), options: CONTROL_SCHEDULE.map((c) => [c.key, c.short.toLocaleLowerCase('tr')]), multiple: true })}
         <div class="form-row">
-          ${field({ label: 'Kontrol saati', name: 'controlTime', type: 'time', value: '10:00' })}
-        </div>` : ''}
+          ${field({ label: 'Kontrol saati', name: 'controlTime', type: 'time', value: '10:00', optional: false })}
+        </div>
+        <p class="field-hint" style="margin-top:-6px">Seçili dönemler işlem tarihine göre randevu olarak eklenir; pazara düşenler pazartesiye alınır.</p>` : ''}
       </form>`,
   });
   wireForm(s, async (d) => {
+    if (!d.type) throw new Error('İşlem türü seçin.');
     if (!d.date) throw new Error('İşlem tarihi zorunludur.');
     const proc = await Procedures.save({
       ...p, patientId, type: d.type, title: d.title, date: d.date, anesthesia: d.anesthesia, notes: d.notes,
     });
     let created = [];
-    if (isNew && d.autoControls) {
+    const keys = isNew ? String(d.controls || '').split(',').filter(Boolean) : [];
+    if (keys.length) {
       const [hh, mm] = (d.controlTime || '10:00').split(':').map(Number);
-      created = await Appointments.saveMany(buildControls(proc, { hour: hh, minute: mm }));
+      created = await Appointments.saveMany(buildControls(proc, { hour: hh, minute: mm, keys }));
     }
     return { procedure: proc, createdControls: created };
   });
@@ -138,18 +133,16 @@ export function appointmentForm({ patientId, procedures = [], existing = null, d
   const [dPart, tPart] = [dt.slice(0, 10), dt.slice(11, 16) || '10:00'];
   const procOpts = [['', 'Bağlı işlem yok'], ...procedures.map((pr) => [pr.id, `${pr.type} · ${fmtDate(pr.date)}`])];
   const s = sheet({
-    title: isNew ? 'Yeni Randevu' : 'Randevuyu Düzenle',
-    footer: footer(isNew ? 'Randevu Ekle' : 'Kaydet'),
+    title: isNew ? 'Yeni randevu' : 'Randevuyu düzenle',
+    footer: footer('Randevuyu kaydet'),
     content: `
       <form id="sheet-form" class="form" novalidate>
         <div class="form-row">
           ${field({ label: 'Tarih', name: 'd', type: 'date', value: dPart, required: true })}
           ${field({ label: 'Saat', name: 't', type: 'time', value: tPart, required: true })}
         </div>
-        <div class="form-row">
-          ${selectField({ label: 'Tür', name: 'kind', value: a.kind || 'kontrol', options: APPT_KINDS })}
-          ${selectField({ label: 'Durum', name: 'status', value: a.status || 'planned', options: [['planned', 'Planlı'], ['done', 'Yapıldı'], ['missed', 'Gelmedi'], ['cancelled', 'İptal']] })}
-        </div>
+        ${chipField({ label: 'Tür', name: 'kind', value: a.kind || 'kontrol', options: APPT_KINDS, required: true })}
+        ${isNew ? '<input type="hidden" name="status" value="planned">' : segmentField({ label: 'Durum', name: 'status', value: a.status || 'planned', options: [['planned', 'Planlı'], ['done', 'Yapıldı'], ['missed', 'Gelmedi'], ['cancelled', 'İptal']], optional: false })}
         ${field({ label: 'Başlık', name: 'label', value: a.label, placeholder: 'Dikiş alımı, pansuman, 2. hafta kontrolü…' })}
         ${selectField({ label: 'Bağlı işlem', name: 'procedureId', value: a.procedureId || '', options: procOpts })}
         ${textareaField({ label: 'Not', name: 'notes', value: a.notes, rows: 2 })}
@@ -183,7 +176,7 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
   const s = sheet({
     title: 'Fotoğraf ekle',
     size: 'md',
-    footer: footer('Ekle'),
+    footer: footer('Fotoğrafları ekle'),
     content: `
       <form id="sheet-form" class="form" novalidate>
         <input type="file" name="files" accept="image/*" multiple class="hidden" id="photo-input">
@@ -200,7 +193,7 @@ export async function photoUploadForm({ patientId, procedures = [], defaultPhase
           ${field({ label: 'Çekim tarihi', name: 'date', type: 'date', value: todayISO(), required: true })}
           ${selectField({ label: 'Bağlı işlem', name: 'procedureId', value: defaultProcedureId, options: procOpts })}
         </div>
-        ${field({ label: 'Etiketler', name: 'tags', placeholder: 'Profil, Ön, Bazal… (virgülle ayırın)' })}
+        ${field({ label: 'Etiketler', name: 'tags', placeholder: 'Profil, Ön, Bazal… (virgülle ayır)' })}
         ${allTags.length ? `<div class="tag-suggest">${allTags.slice(0, 12).map((t) => `<button type="button" class="chip sm" data-tag="${esc(t)}">${esc(t)}</button>`).join('')}</div>` : ''}
       </form>`,
   });

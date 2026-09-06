@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Hasta Takip</title>
 <meta name="description" content="Plastik cerrahi hasta takip uygulaması">
 <meta name="theme-color" content="#0B1326">
@@ -13,11 +13,13 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<script>/* Tema: CSS yüklenmeden önce uygulanır (bkz. js/theme.js) */
+(function(){try{var t=localStorage.getItem('hasta-takip:theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
-<link rel="stylesheet" href="./css/tokens.css?v=0.2.2">
-<link rel="stylesheet" href="./css/app.css?v=0.2.2">
+<link rel="stylesheet" href="./css/tokens.css?v=0.3.0">
+<link rel="stylesheet" href="./css/app.css?v=0.3.0">
 </head>
 <body>
 <div id="app" class="app">
@@ -45,6 +47,6 @@
   </nav>
 </div>
 <div id="layer"></div>
-<script type="module" src="./js/app.js?v=0.2.2"></script>
+<script type="module" src="./js/app.js?v=0.3.0"></script>
 </body>
 </html>

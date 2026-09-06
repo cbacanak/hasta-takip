@@ -4,8 +4,10 @@ import { esc, icon, toast, confirmDialog, actionMenu } from '../ui.js';
 import { setTopbar } from '../nav.js';
 import { storageInfo, requestPersist, fmtBytes, downloadBackup, pickBackupFile, restoreBackup } from '../storage.js';
 import { hasPin, getLockDelay, setLockDelay, clearPin, setupPinFlow, requirePin, LOCK_DELAYS } from '../lock.js';
+import { getTheme, applyTheme, THEMES } from '../theme.js';
+import { segmented, bindSegmented } from '../ui.js';
 
-export const APP_VERSION = '0.2.2';
+export const APP_VERSION = '0.3.0';
 
 export async function render(root) {
   setTopbar({ title: 'Ayarlar' });
@@ -43,6 +45,11 @@ export async function render(root) {
     </div>
 
     <section class="section">
+      <div class="section-label">Görünüm</div>
+      ${segmented({ name: 'theme', value: getTheme(), options: THEMES })}
+    </section>
+
+    <section class="section">
       <div class="section-label">Güvenlik</div>
       ${rowBtn('pin', 'PIN kilidi', pinOn ? `${esc(delayLabel === 'Hemen' ? 'Arka planda hemen' : delayLabel + ' sonra')} kilitlenir` : '', { value: pinOn ? 'Açık' : 'Kapalı' })}
     </section>
@@ -69,6 +76,7 @@ export async function render(root) {
     <p class="t-caption section" style="color:var(--text-tertiary)">Hasta Takip · sürüm ${APP_VERSION}</p>
     </div>`;
 
+  bindSegmented(root.querySelector('.seg[data-name=theme]'), (v) => applyTheme(v));
   root.querySelector('[data-act=pin]').onclick = async () => {
     if (!pinOn) {
       if (await setupPinFlow()) { toast('PIN kilidi açıldı'); render(root); }

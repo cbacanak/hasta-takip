@@ -37,9 +37,9 @@ export function skipSunday(date) {
  * @param {object} procedure  { id, patientId, date (YYYY-MM-DD), type }
  * @param {object} opts       { hour, minute, avoidSunday }
  */
-export function buildControls(procedure, { hour = 10, minute = 0, avoidSunday = true } = {}) {
+export function buildControls(procedure, { hour = 10, minute = 0, avoidSunday = true, keys = null } = {}) {
   const base = new Date(procedure.date + 'T00:00:00');
-  return CONTROL_SCHEDULE.map((c) => {
+  return CONTROL_SCHEDULE.filter((c) => !keys || keys.includes(c.key)).map((c) => {
     let d = c.add(base);
     if (avoidSunday) d = skipSunday(d);
     d.setHours(hour, minute, 0, 0);
